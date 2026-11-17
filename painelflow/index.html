@@ -484,7 +484,7 @@ const KEY=SK('kpi-v2'),CK=SK('kpi-cfg'),snap=()=>JSON.stringify(K.map(k=>({id:k.
 let cfg={title:'Daily Kaizen – Oficina '+BR.name,sub:'Painel de indicadores (KPIs)',hidden:[],order:[],logo:"",logoH:4,logoBg:0};
 function loadCfg(s){try{const o=JSON.parse(s);if(o){if(typeof o.title=='string')cfg.title=o.title;if(typeof o.sub=='string')cfg.sub=o.sub;if(Array.isArray(o.hidden))cfg.hidden=o.hidden;if(Array.isArray(o.order))cfg.order=o.order;if(typeof o.logo=="string")cfg.logo=o.logo;if(+o.logoH)cfg.logoH=+o.logoH;cfg.logoBg=o.logoBg?1:0}}catch(e){}}
 const saveCfg=()=>{try{localStorage.setItem(CK,JSON.stringify(cfg))}catch(e){}};
-const applyCfg=()=>{document.getElementById('ft').innerHTML=`<span>Linha tracejada amarela: meta. Colunas cinza: fim de semana. Arraste os cards para mudar a ordem.</span><span>Painel KPIs Daily Kaizen v3.18 · ${(()=>{const h=typeof ihist=='object'&&ihist[area];return h?'última importação: '+new Date(h.at).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'exibido em '+new Date().toLocaleDateString('pt-BR')})()}</span>`;const AN=area=='of'?'Oficina':AREAS.find(a=>a[0]==area)[1],TT=cfg.title=='Daily Kaizen – Oficina '+BR.name?'Daily Kaizen – '+AN+' '+BR.name:cfg.title;document.getElementById('ti').textContent=TT;document.getElementById('su').textContent=cfg.sub;document.title=TT;const lg=document.getElementById("logo");if(cfg.logo){lg.src=cfg.logo;lg.hidden=false;lg.style.setProperty("--lh",(cfg.logoH||4)+"vw");lg.classList.toggle("bg",!!cfg.logoBg)}else{lg.hidden=true;lg.removeAttribute("src")}};
+const applyCfg=()=>{document.getElementById('ft').innerHTML=`<span>Linha tracejada amarela: meta. Colunas cinza: fim de semana. Arraste os cards para mudar a ordem.</span><span>Painel KPIs Daily Kaizen v3.19 · ${(()=>{const h=typeof ihist=='object'&&ihist[area];return h?'última importação: '+new Date(h.at).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'exibido em '+new Date().toLocaleDateString('pt-BR')})()}</span>`;const AN=area=='of'?'Oficina':AREAS.find(a=>a[0]==area)[1],TT=cfg.title=='Daily Kaizen – Oficina '+BR.name?'Daily Kaizen – '+AN+' '+BR.name:cfg.title;document.getElementById('ti').textContent=TT;document.getElementById('su').textContent=cfg.sub;document.title=TT;const lg=document.getElementById("logo");if(cfg.logo){lg.src=cfg.logo;lg.hidden=false;lg.style.setProperty("--lh",(cfg.logoH||4)+"vw");lg.classList.toggle("bg",!!cfg.logoBg)}else{lg.hidden=true;lg.removeAttribute("src")}};
 const fixRev=()=>K.forEach(k=>{if(!k.t&&/fatur/i.test(k.n)&&k.u!="$")k.u="$"});
 function load(s){try{let o=JSON.parse(s);if(!Array.isArray(o)){if(o.cfg)loadCfg(JSON.stringify(o.cfg));o=o.k||[]}o.forEach(o=>{if(o.id=="czs")return;const k=K.find(z=>z.id==o.id);if(k){k.v=o.v;k.m=o.m;if(o.x)k.x=o.x;if(o.dd)k.dd=o.dd;if(o.z)k.z=o.z;if(o.b!=null)k.b=o.b;if(o.md)k.md=o.md;if(o.mo)k.mo=o.mo;if(o.n&&k.id=='fat')k.n=o.n}else if(o.n&&o.a)K.push({...o,v:o.v||P([]),m:o.m||P([])})});fixRev()}catch(e){}}
 let lastSave=null;const svTxt=()=>lastSave?'Salvo às '+lastSave.toLocaleTimeString('pt-BR'):'Salvamento automático';
@@ -760,12 +760,12 @@ async function readFiles(list){const fs=[...list].filter(f=>/\.(xlsx|xlsm|json)$
  const res=[];let lastAr=null,i=0;
  for(const f of fs){i++;toast(`Importando planilha ${i} de ${fs.length}…`,60000);
   if(/\.json$/i.test(f.name)){res.push({f:f.name,err:'backup .json: importe sozinho'});continue}
-  try{const wb=XLSX.read(await f.arrayBuffer(),XO),ar=arOf(f.name)||arWb(wb)||area,prevH=ihist[ar],r=importXlsx(wb,ar,f.name,true);if(!r.ch&&!r.nw){if(prevH)ihist[ar]=prevH;else delete ihist[ar];try{localStorage.setItem(IH,JSON.stringify(ihist))}catch(e){}res.push({f:f.name,err:'nenhum valor encontrado'})}else{res.push({f:f.name,ar,ch:r.ch,nw:r.nw,m:mi(f)});lastAr=ar}}
+  try{const wb=XLSX.read(await f.arrayBuffer(),XO),ar=arOf(f.name)||arWb(wb)||area,prevH=ihist[ar],r=importXlsx(wb,ar,f.name,true);if(!r.ch&&!r.nw){if(prevH)ihist[ar]=prevH;else delete ihist[ar];try{localStorage.setItem(IH,JSON.stringify(ihist))}catch(e){}res.push({f:f.name,err:'nenhum valor encontrado'})}else{res.push({f:f.name,ar,ch:r.ch,nw:r.nw,m:r.anual?-1:mi(f)});lastAr=ar}}
   catch(x){res.push({f:f.name,err:'não foi possível ler'})}
   await new Promise(r=>setTimeout(r,0))}
  if(lastAr&&lastAr!=area)setArea(lastAr);else{cur=last(area);render()}
  const AN=a=>a=='of'?'Oficina':AREAS.find(x=>x[0]==a)[1],ok=res.filter(r=>!r.err),by={};
- ok.forEach(r=>{(by[r.ar]=by[r.ar]||[]).push(r.m<12?M[r.m]:'?')});
+ ok.forEach(r=>{(by[r.ar]=by[r.ar]||[]).push(r.m<0?'ano todo':r.m<12?M[r.m]:'?')});
  const tot=ok.reduce((a,r)=>a+r.ch,0),nw=ok.reduce((a,r)=>a+(r.nw||0),0);
  let t=`${ok.length} de ${fs.length} planilhas importadas · ${tot} valores atualizados${nw?` · ${nw} KPI(s) novo(s)`:''}`;
  for(const a in by)t+=`\n${AN(a)}: ${by[a].join(', ')}`;
@@ -827,11 +827,26 @@ function render(){document.getElementById('mo').textContent=MF[cur];document.get
  document.querySelector('.mn').style.visibility=tab=='atualizar'||tab=='config'?'hidden':'visible';
  document.getElementById('app').innerHTML=({detalhe,atualizar,config}[tab]||painel)()}
 const toast=(t,ms)=>{const e=document.getElementById('toast');e.textContent=t;e.style.whiteSpace='pre-line';e.style.display='block';e.onclick=()=>e.style.display='none';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',ms||3500)};
-function importXlsx(wb,ar,fn,quiet){const nz=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();let fm=MF.findIndex(m=>nz(fn||'').includes(nz(m)));const fmNome=fm>=0;if(fm<0)fm=new Date().getFullYear()==2026?new Date().getMonth():cur;let ch=0,nw=0,fatU=0;const T=/^\d+:\d\d/,grid=ws=>{const r=XLSX.utils.decode_range(ws['!ref']||'A1'),o=[];for(let i=0;i<=r.e.r;i++){o[i]=[];for(let j=0;j<=r.e.c;j++)o[i][j]=ws[XLSX.utils.encode_cell({r:i,c:j})]||null}return o},
+function importXlsx(wb,ar,fn,quiet){const nz=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();const anual=wb.SheetNames.some(s=>/lancamento/.test(nz(s)));let fm=MF.findIndex(m=>nz(fn||'').includes(nz(m)));const fmNome=fm>=0||anual;if(fm<0)fm=new Date().getFullYear()==2026?new Date().getMonth():cur;let ch=0,nw=0,fatU=0;const T=/^\d+:\d\d/,grid=ws=>{const r=XLSX.utils.decode_range(ws['!ref']||'A1'),o=[];for(let i=0;i<=r.e.r;i++){o[i]=[];for(let j=0;j<=r.e.c;j++)o[i][j]=ws[XLSX.utils.encode_cell({r:i,c:j})]||null}return o},
  tm=c=>!!c&&c.t=='n'&&(T.test(c.w||'')||/h/i.test(c.z||'')),cn=(c,mn)=>!c||c.t!='n'?null:(tm(c)||(mn&&c.v<1.5))?Math.round(c.v*1440):c.v,
  set=(k,f,a)=>{if(f=='x'&&!k.x)k.x=P([]);a.forEach((x,i)=>{if(x!=null){k[f][i]=x;ch++}})},
  setM=(k,a)=>a.forEach((x,i)=>{if(x==null)return;const o=(k.mo||{})['m:'+i];if(o){o.x=x;return}k.m[i]=x;ch++}),
  LOW=/aberto|retorno|reclama|atraso|acidente|devolu|porta a porta|tempo|pendente/i,KN=[[/kaizen p\//,'kc'],[/pitstop/,'pit'],[/^retorno/,'ret'],[/ldv/,'ldv'],[/nps/,'nps'],[/worthix/,'wor'],[/porta/,'pp'],[/kaizens/,'kz'],[/passagens/,'pas'],[/agendados/,'agc']];
+ /* planilha anual: aba "Lançamento diário" (uma linha por dia do ano) e aba "Cruzes" (status por dia) */
+ {const acha=nm=>{const n=String(nm).trim(),l=n.toLowerCase();let k=K.find(z=>z.a==ar&&!z.t&&z.n.toLowerCase()==l);
+   if(!k&&ar=='of'){if(/fatur/.test(l)&&!/pit/.test(l))k=K.find(z=>z.id=='fat');else{const p=KN.find(p=>p[0].test(l));if(p)k=K.find(z=>z.id==p[1])}}return k},
+   dataDe=c=>{if(!c||c.t!='n'||c.v<40000)return null;const d=XLSX.SSF.parse_date_code(c.v);return d&&d.y==2026?{m:d.m-1,d:d.d}:null},
+   stCruz=v=>{const t=nz(String(v||'').trim());return !t?null:/nao conforme/.test(t)?3:/melhoria/.test(t)?2:/conforme/.test(t)?1:null};
+  wb.SheetNames.forEach(sn=>{const n0=nz(sn);if(!/lancamento|cruzes/.test(n0))return;const g=grid(wb.Sheets[sn]);
+   const hr=g.findIndex(r=>r.some(c=>c&&c.t=='s'&&nz(String(c.v).trim())=='data'));if(hr<0)return;
+   const dj=g[hr].findIndex(c=>c&&c.t=='s'&&nz(String(c.v).trim())=='data');
+   g[hr].forEach((hc,j)=>{if(j==dj||!hc||hc.t!='s')return;const h=String(hc.v).trim();
+    if(/cruzes/.test(n0)){const id=/ambiente/i.test(h)?'cza':/satisf/i.test(h)?'czc':null;if(!id)return;const Q=spk(ar,id,1);Q.z.s=Q.z.s||{};
+     for(let r=hr+1;r<g.length;r++){const dt=dataDe((g[r]||[])[dj]);if(!dt)continue;const st=stCruz(((g[r]||[])[j]||{}).v);if(st==null)continue;(Q.z.s[dt.m]=Q.z.s[dt.m]||[])[dt.d-1]=st;ch++}return}
+    const [base,campo]=h.split(' · '),k=acha(base);if(!k)return;const f=campo?(/encaixe/i.test(campo)?'x':null):'v';if(!f)return;
+    if(f=='x'&&!k.x)k.x=P([]);const mn=k.u=='min';
+    for(let r=hr+1;r<g.length;r++){const dt=dataDe((g[r]||[])[dj]);if(!dt)continue;const x=cn((g[r]||[])[j],mn);if(x==null)continue;
+     k.dd=k.dd||{};const D=k.dd[dt.m]=k.dd[dt.m]||{};D[f]=D[f]||Array(31).fill(null);D[f][dt.d-1]=x;if(D['r'+f])D['r'+f][dt.d-1]=null;ch++}})})}
  {const hasFK=wb.SheetNames.filter(s=>/KPI|Indicad/i.test(s)).some(s=>{const ws=wb.Sheets[s];return Object.keys(ws).some(a=>a[0]!='!'&&ws[a]&&ws[a].t=='s'&&/fatura/i.test(ws[a].v))}),AN=AREAS.find(a=>a[0]==ar)[1],fl=wb.SheetNames.filter(s=>/Fat/i.test(s)),fs=fl.find(s=>nz(s).includes(nz(AN)))||(ar=='of'?fl.find(s=>/oficina/i.test(s)):null)||(ar=='of'?fl[0]:null);
   if(fs&&!hasFK){let k=K.find(z=>z.a==ar&&!z.t&&z.u=='$');if(!k){k={id:'d_'+ar+'_fat',n:'Faturamento '+AN,u:'$',b:1,a:ar,dyn:1,v:P([]),m:P([])};K.push(k);nw++}
    grid(wb.Sheets[fs]).forEach(r=>{const j=r.findIndex(c=>c&&c.t=='s'&&(c.v=='Meta'||c.v=='Resultado'));if(j<0)return;set(k,r[j].v=='Meta'?'m':'v',r.slice(j+1,j+13).map(c=>cn(c)))})}}
@@ -839,7 +854,7 @@ function importXlsx(wb,ar,fn,quiet){const nz=s=>s.normalize('NFD').replace(/[\u0
   fillSt=c=>{const f=c&&c.s&&(c.s.fgColor||c.s.bgColor),h=f&&f.rgb?String(f.rgb).slice(-6):'';if(h.length!=6)return 0;const R=parseInt(h.slice(0,2),16),G=parseInt(h.slice(2,4),16),B=parseInt(h.slice(4,6),16);
    return G>140&&R<110&&B<130?1:R>200&&G>140&&B<100?2:R>200&&G<90&&B<90?3:0};
   wb.SheetNames.forEach(sn=>{const g=grid(wb.Sheets[sn]);
-   if(/dias sem/i.test(sn)){g.forEach(r=>r.forEach(c=>{if(c&&c.t=='s'){const m=c.v.match(/(\d+)\s*DIAS?\s*SEM\s*ACIDENTE.*?(\d{2})[.\/](\d{2})[.\/](\d{4})/i);if(m){const D=Z('dsa'),nd=m[4]+'-'+m[3]+'-'+m[2];if(!D.z.d||nd>=D.z.d){D.z.n=+m[1];D.z.d=nd;ch++}}}}))}
+   if(/dias sem/i.test(sn)){g.forEach(r=>r.forEach(c=>{if(c&&c.t=='s'){const m=c.v.match(/(\d+)\s*DIAS?\s*SEM\s*ACIDENTE.*?(\d{2})[.\/](\d{2})[.\/](\d{4})/i);if(m){const D=Z('dsa'),nd=m[4]+'-'+m[3]+'-'+m[2];if(!D.z.d||nd>=D.z.d){D.z.n=+m[1];D.z.d=nd;if(anual)D.z.auto=1;ch++}}}}))}
    if(/pir/i.test(sn)){const hr=g.findIndex(r=>r.some((c,j)=>c&&c.v==='Jan'&&r[j+1]&&r[j+1].v==='Fev'));if(hr>=0){const cj=g[hr].findIndex(c=>c&&c.v==='Jan'),pj=g[hr].findIndex(c=>c&&c.t=='s'&&/anterior/i.test(c.v)),Q=Z('pir');
     for(let ri=0;ri<6;ri++){const r=g[hr+1+ri]||[];for(let mi=0;mi<12;mi++){const c=r[cj+mi];if(c&&c.t=='n'){Q.z.r[ri][mi]=c.v;ch++}}if(pj>=0&&r[pj]&&r[pj].t=='n')Q.z.p[ri]=r[pj].v}}
     const WDN=['dom','seg','ter','qua','qui','sex','sab'],wdi=c=>c&&c.t=='s'?WDN.indexOf(nz(String(c.v).trim()).slice(0,3)):-1;
@@ -870,7 +885,7 @@ function importXlsx(wb,ar,fn,quiet){const nz=s=>s.normalize('NFD').replace(/[\u0
    const dr=g.findIndex(r=>r[ci]&&r[ci].v==='Dia');if(dr>=0){if(k.u=='$'){for(let r=dr+32;r<Math.min(g.length,dr+60);r++){const c0=g[r]&&g[r][ci];if(c0&&c0.t=='s'&&/met\w*\.?\s*di[aá]ria/i.test(c0.v)){const c1=[1,2,3].map(o=>g[r][ci+o]).find(c=>c&&c.t=='n');if(c1){k.md=k.md||P([]);const o=(k.mo||{})['md:'+fm];if(o)o.x=c1.v;else{k.md[fm]=c1.v;ch++}}break}}}const dayOf=r=>{const c=r&&r[ci];if(!c||c.t!='n')return null;if(Number.isInteger(c.v)&&c.v>=1&&c.v<=31)return c.v;if(c.v>40000){const d=XLSX.SSF.parse_date_code(c.v);return d&&d.m==fm+1?d.d:null}return null},RW=g.slice(dr+1,dr+40),DR=RW.map(dayOf),useK=DR.filter(x=>x).length>=5,dc=o=>{const a=Array(31).fill(null);RW.forEach((r,j)=>{const day=useK?DR[j]:(j<31?j+1:null);if(!day)return;const x=cn(r[ci+1+o],mn);if(x!=null)a[day-1]=x});return a},E={v:dc(vi)};if(xi>=0)E.x=dc(xi);if(mi>=0&&k.id!='pp')E.m=dc(mi);
     if(Object.values(E).some(a=>a.some(x=>x!=null))){const O=(k.dd=k.dd||{})[fm]||{};for(const f in E){delete O['r'+f];delete O['n'+f]}if(E.m)E.m=E.m.map((x,i)=>{const o=(k.mo||{})['dm:'+fm+':'+i];if(o){o.x=x;return (O.m||[])[i]??null}return x});k.dd[fm]={...O,...E};ch++}}if(mv[fm]==null&&k.v[fm]!=null){k.v[fm]=null;ch++}})});
  ihist[ar]={fn:fn||'',at:Date.now(),ch,nw};try{localStorage.setItem(IH,JSON.stringify(ihist))}catch(e){}
- save();if(quiet)return{ch,nw};if(ar==area)cur=last(ar);render();toast(ch?`${ar=='of'?'Oficina':AREAS.find(a=>a[0]==ar)[1]}: planilha de ${MF[fm]} importada, ${ch} valores atualizados${nw?` · ${nw} KPI(s) novo(s)`:''}.${fmNome?'':`\n⚠ O nome do arquivo não tem o mês: os lançamentos diários foram para ${MF[fm]}. Coloque o mês no nome (ex.: “Janeiro”) e importe de novo se não for ${MF[fm]}.`}`:'Nenhum valor encontrado na planilha.',fmNome?3500:15000)}
+ save();if(quiet)return{ch,nw,anual};if(ar==area)cur=last(ar);render();toast(ch?`${ar=='of'?'Oficina':AREAS.find(a=>a[0]==ar)[1]}: ${anual?'planilha anual':'planilha de '+MF[fm]} importada, ${ch} valores atualizados${nw?` · ${nw} KPI(s) novo(s)`:''}.${fmNome?'':`\n⚠ O nome do arquivo não tem o mês: os lançamentos diários foram para ${MF[fm]}. Coloque o mês no nome (ex.: “Janeiro”) e importe de novo se não for ${MF[fm]}.`}`:'Nenhum valor encontrado na planilha.',fmNome?3500:15000)}
 document.addEventListener('click',e=>{const d=e.target.closest('[data-cz]');if(d){const k=K.find(z=>z.id==d.dataset.cz),i=+d.dataset.d;const mo=+d.dataset.m;k.z.s[mo]=k.z.s[mo]||[];k.z.s[mo][i]=((k.z.s[mo][i]||0)+1)%4;save();render();return}
 const b=e.target.closest('button');if(!b)return;
  if(b.dataset.us){setUs(b.dataset.us);if(b.dataset.czk)czSel=b.dataset.czk;render();const a=document.getElementById('app');if(a)a.scrollTop=0;return}
