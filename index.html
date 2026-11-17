@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mabel Sistemas</title>
+<meta name="description" content="Sistemas e aplicações da Mabel">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="apple-touch-icon" href="img/mabel-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef2f7;--cd:#fff;--cd2:#f4f7fb;--tx:#0d1626;--mu:#5a6a84;--bd:#dfe5ee;--bd2:#cbd4e1;--ok:#0d9f5c;--bad:#e0263b;--info:#1f6fe0;--meta:#d98a00;--steel:#2a3a55;
+ --sh:0 1px 2px rgba(13,22,38,.05),0 14px 34px -16px rgba(13,22,38,.22);--shh:0 2px 4px rgba(13,22,38,.06),0 26px 50px -20px rgba(13,22,38,.32);--grid:rgba(13,22,38,.045);color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#0a101c;--cd:#111a2b;--cd2:#0d1524;--tx:#e8eef7;--mu:#8e9db6;--bd:#1f2b41;--bd2:#2c3b57;--ok:#2bd47d;--bad:#ff4d5e;--info:#5aa9ff;--meta:#ffb020;--steel:#c9d6ea;
+ --sh:0 1px 0 rgba(255,255,255,.035) inset,0 18px 40px -22px rgba(0,0,0,.85);--shh:0 1px 0 rgba(255,255,255,.05) inset,0 30px 60px -24px rgba(0,0,0,.95);--grid:rgba(140,170,220,.05);color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--tx);font-family:'Barlow',system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:48px 48px;-webkit-mask-image:linear-gradient(180deg,#000,transparent 60%);mask-image:linear-gradient(180deg,#000,transparent 60%)}
+.wrap{position:relative;max-width:1200px;margin:0 auto;padding:clamp(24px,5vw,56px) 16px 32px}
+header{display:flex;align-items:center;gap:16px;margin-bottom:clamp(24px,4vw,40px)}
+.mark{flex:none;width:72px;height:72px;border-radius:18px;background:#141414;position:relative;overflow:hidden;box-shadow:0 0 0 1px var(--bd),var(--sh)}
+.mark img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 0}
+h1{margin:0;font-family:'Barlow Condensed','Barlow',system-ui,sans-serif;font-weight:700;font-size:clamp(30px,4.4vw,46px);line-height:1}
+h1 small{display:block;font-family:'Barlow',system-ui,sans-serif;font-size:16px;font-weight:500;color:var(--mu);margin-top:6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,460px),1fr));gap:clamp(16px,2.4vw,28px);list-style:none;margin:0;padding:0}
+a.card{display:flex;flex-direction:column;height:100%;background:var(--cd);border:1px solid var(--bd);border-radius:20px;box-shadow:var(--sh);color:inherit;text-decoration:none;overflow:hidden;transition:border-color .2s,transform .2s,box-shadow .2s}
+a.card:hover{border-color:var(--info);transform:translateY(-4px);box-shadow:var(--shh)}
+a.card:focus-visible{outline:3px solid var(--info);outline-offset:3px}
+.shot{position:relative;aspect-ratio:16/10;background:var(--cd2);border-bottom:1px solid var(--bd);overflow:hidden}
+.shot::before{content:"";position:absolute;inset:0 0 auto;height:26px;background:var(--cd2);border-bottom:1px solid var(--bd);z-index:1}
+.shot::after{content:"";position:absolute;top:9px;left:12px;width:8px;height:8px;border-radius:50%;background:var(--bad);box-shadow:14px 0 0 var(--meta),28px 0 0 var(--ok);z-index:2}
+.shot img{position:absolute;inset:26px 0 0;width:100%;height:calc(100% - 26px);object-fit:cover;object-position:top left;transition:transform .5s ease}
+a.card:hover .shot img{transform:scale(1.035)}
+.shot .ph{position:absolute;inset:26px 0 0;display:grid;place-items:center;color:var(--info)}
+.shot .ph svg{width:56px;height:56px}
+.body{display:flex;align-items:center;gap:14px;padding:18px 20px 20px}
+.ic{flex:none;width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:var(--cd2);border:1px solid var(--bd);color:var(--info)}
+svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tx{flex:1;min-width:0}
+.tx b{display:block;font-family:'Barlow Condensed','Barlow',system-ui,sans-serif;font-size:24px;font-weight:700;line-height:1.1}
+.tx span{display:block;margin-top:3px;font-size:15px;color:var(--mu)}
+.go{flex:none;display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:10px;background:var(--cd2);border:1px solid var(--bd);font-size:14px;font-weight:600;color:var(--tx);transition:background .2s,border-color .2s,color .2s}
+.go svg{width:16px;height:16px;transition:transform .2s}
+a.card:hover .go{background:var(--info);border-color:var(--info);color:var(--cd)}
+a.card:hover .go svg{transform:translateX(3px)}
+footer{margin-top:36px;font-size:13px;color:var(--mu);text-align:center}
+@media (max-width:520px){.go span{display:none}.go{padding:9px}.tx b{font-size:21px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <div class="mark"><img src="img/mabel.webp" alt="Mabel" width="72" height="72"></div>
+ <h1>Mabel Sistemas<small>Escolha o sistema que deseja abrir</small></h1>
+</header>
+<ul class="grid" id="g"></ul>
+<footer>mabelcba.github.io</footer>
+</div>
+<script>
+const I={
+ chart:'<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/>',
+ phone:'<rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/>',
+ car:'<path d="M5 17h14v-5l-2-5H7l-2 5z"/><circle cx="8" cy="17" r="2"/><circle cx="16" cy="17" r="2"/>',
+ report:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>',
+ truck:'<path d="M3 6h11v10H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',
+ check:'<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
+ shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+ tool:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/>'
+};
+/* Cada linha é um card: [pasta, título, descrição, ícone]. A miniatura vem de thumbs/<pasta>.webp.
+   Para esconder um card, coloque // no começo da linha. */
+const S=[
+ ['painelflow','Painel KPIs','Daily Kaizen da oficina','chart'],
+ ['controledisp','Frota Móvel','Controle de celulares e tablets','phone'],
+ ['controlseminovos','Controle de Seminovos','Acompanhamento de veículos','car'],
+ ['reportevps2026','Reporte VPS','Indicadores semanais · Nors CO','report'],
+ // ['manifestogarantia','Manifesto','Acompanhamento de transportadoras','truck'],
+ // ['boletim-garantia','Boletim de Garantia','Garantia','shield'],
+ // ['EstoqueA-es','Plano de Ações 5S','Ações e estoque','check'],
+ // ['Flash-Kaizen-Nors','Laudo Técnico','Laudo de atendimento NORS','tool']
+];
+const svg=i=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${I[i]}</svg>`;
+document.getElementById('g').innerHTML=S.map(([p,t,d,i])=>`<li><a class="card" href="/${p}/">
+ <div class="shot"><div class="ph">${svg(i)}</div><img src="thumbs/${p}.webp" alt="Prévia do ${t}" loading="lazy" onerror="this.remove()"></div>
+ <div class="body"><div class="ic">${svg(i)}</div><div class="tx"><b>${t}</b><span>${d}</span></div>
+ <span class="go"><span>Abrir</span><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+</a></li>`).join('');
+</script>
+</body>
+</html>
