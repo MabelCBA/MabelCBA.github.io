@@ -477,24 +477,24 @@ const KEY=SK('kpi-v2'),CK=SK('kpi-cfg'),snap=()=>JSON.stringify(K.map(k=>({id:k.
 let cfg={title:'Daily Kaizen – Oficina '+BR.name,sub:'Painel de indicadores (KPIs)',hidden:[],order:[],logo:"",logoH:4,logoBg:0};
 function loadCfg(s){try{const o=JSON.parse(s);if(o){if(typeof o.title=='string')cfg.title=o.title;if(typeof o.sub=='string')cfg.sub=o.sub;if(Array.isArray(o.hidden))cfg.hidden=o.hidden;if(Array.isArray(o.order))cfg.order=o.order;if(typeof o.logo=="string")cfg.logo=o.logo;if(+o.logoH)cfg.logoH=+o.logoH;cfg.logoBg=o.logoBg?1:0}}catch(e){}}
 const saveCfg=()=>{try{localStorage.setItem(CK,JSON.stringify(cfg))}catch(e){}};
-const applyCfg=()=>{document.getElementById('ft').innerHTML=`<span>Linha tracejada amarela: meta. Colunas cinza: fim de semana. Arraste os cards para mudar a ordem.</span><span>Painel KPIs Daily Kaizen v3.16 · ${(()=>{const h=typeof ihist=='object'&&ihist[area];return h?'última importação: '+new Date(h.at).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'exibido em '+new Date().toLocaleDateString('pt-BR')})()}</span>`;const AN=area=='of'?'Oficina':AREAS.find(a=>a[0]==area)[1],TT=cfg.title=='Daily Kaizen – Oficina '+BR.name?'Daily Kaizen – '+AN+' '+BR.name:cfg.title;document.getElementById('ti').textContent=TT;document.getElementById('su').textContent=cfg.sub;document.title=TT;const lg=document.getElementById("logo");if(cfg.logo){lg.src=cfg.logo;lg.hidden=false;lg.style.setProperty("--lh",(cfg.logoH||4)+"vw");lg.classList.toggle("bg",!!cfg.logoBg)}else{lg.hidden=true;lg.removeAttribute("src")}};
+const applyCfg=()=>{document.getElementById('ft').innerHTML=`<span>Linha tracejada amarela: meta. Colunas cinza: fim de semana. Arraste os cards para mudar a ordem.</span><span>Painel KPIs Daily Kaizen v3.17 · ${(()=>{const h=typeof ihist=='object'&&ihist[area];return h?'última importação: '+new Date(h.at).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'exibido em '+new Date().toLocaleDateString('pt-BR')})()}</span>`;const AN=area=='of'?'Oficina':AREAS.find(a=>a[0]==area)[1],TT=cfg.title=='Daily Kaizen – Oficina '+BR.name?'Daily Kaizen – '+AN+' '+BR.name:cfg.title;document.getElementById('ti').textContent=TT;document.getElementById('su').textContent=cfg.sub;document.title=TT;const lg=document.getElementById("logo");if(cfg.logo){lg.src=cfg.logo;lg.hidden=false;lg.style.setProperty("--lh",(cfg.logoH||4)+"vw");lg.classList.toggle("bg",!!cfg.logoBg)}else{lg.hidden=true;lg.removeAttribute("src")}};
 const fixRev=()=>K.forEach(k=>{if(!k.t&&/fatur/i.test(k.n)&&k.u!="$")k.u="$"});
 function load(s){try{let o=JSON.parse(s);if(!Array.isArray(o)){if(o.cfg)loadCfg(JSON.stringify(o.cfg));o=o.k||[]}o.forEach(o=>{if(o.id=="czs")return;const k=K.find(z=>z.id==o.id);if(k){k.v=o.v;k.m=o.m;if(o.x)k.x=o.x;if(o.dd)k.dd=o.dd;if(o.z)k.z=o.z;if(o.b!=null)k.b=o.b;if(o.md)k.md=o.md;if(o.mo)k.mo=o.mo;if(o.n&&k.id=='fat')k.n=o.n}else if(o.n&&o.a)K.push({...o,v:o.v||P([]),m:o.m||P([])})});fixRev()}catch(e){}}
 let lastSave=null;const svTxt=()=>lastSave?'Salvo às '+lastSave.toLocaleTimeString('pt-BR'):'Salvamento automático';
 /* Faturamento: valores em R$ nunca são guardados. Cada mês vira fração da meta do mês (meta = 1 = 100%);
    os lançamentos diários viram fração da meta do mês. Sem meta para converter, o valor em R$ é descartado. */
-const normFat=k=>{if(k.u!='$')return 0;let ch=0;const big=x=>x!=null&&Math.abs(x)>10;
+const normFat=k=>{if(k.u!='$')return 0;let ch=0;
+ /* só valores em R$ (grandes) são convertidos; frações já convertidas ficam como estão.
+    valores quase zero (< 0,000001) vêm de conversão repetida e são descartados (reimporte a planilha do mês). */
+ const big=x=>x!=null&&Math.abs(x)>10,bad=x=>x!=null&&x!==0&&Math.abs(x)<1e-6;
+ const fix=(x,M)=>x==null?null:bad(x)?(ch++,null):big(x)?(ch++,M?x/M:null):x;
  for(let i=0;i<12;i++){let M=k.m[i];const D=(k.dd||{})[i];
   if(M!=null&&!(M>0)){k.m[i]=M=null;ch++}
-  if(M!=null&&Math.abs(M-1)>1e-9){
-   if(k.v[i]!=null)k.v[i]=k.v[i]/M;
-   if(k.md&&k.md[i]!=null)k.md[i]=k.md[i]/M;
-   if(D)['v','m','x'].forEach(f=>{if(Array.isArray(D[f]))D[f]=D[f].map(x=>x==null?null:x/M)});
-   k.m[i]=1;ch++}
-  else{
-   if(big(k.v[i])){k.v[i]=null;ch++}
-   if(k.md&&big(k.md[i])){k.md[i]=null;ch++}
-   if(D)['v','m','x'].forEach(f=>{if(Array.isArray(D[f])&&D[f].some(big)){D[f]=D[f].map(x=>big(x)?null:x);ch++}})}}
+  const emReais=M!=null&&Math.abs(M-1)>1e-9;
+  k.v[i]=fix(k.v[i],emReais?M:null);
+  if(k.md)k.md[i]=fix(k.md[i],emReais?M:null);
+  if(D)['v','m','x'].forEach(f=>{if(Array.isArray(D[f]))D[f]=D[f].map(x=>fix(x,emReais?M:null))});
+  if(emReais){k.m[i]=1;ch++}}
  if(k.mo)for(const key in k.mo)if(/^(m|md|dm):/.test(key)){delete k.mo[key];ch++}
  return ch};
 const save=()=>{K.forEach(normFat);try{localStorage.setItem(KEY,snap())}catch(e){}lastSave=new Date();const e=document.getElementById('svst');if(e)e.textContent=svTxt()};
