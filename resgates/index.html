@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resgates Kaizen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070d1a; --bg2:#0c1426; --card:#0f1a2f; --card2:#14213a; --card3:#1a2945; --line:#1f2d48; --line2:#2b3c5e;
+  --txt:#eef2f9; --txt2:#b9c4d8; --mut:#7f8ca6;
+  --acc:#f28c28; --acc2:#ffb067; --accDeep:#c2410c;
+  /* status (semântico, sempre com ícone + rótulo) */
+  --st-rec:#f59e0b; --st-apr:#3987e5; --st-ent:#22c55e; --st-rcs:#e66767;
+  /* barras de gráfico: uma série = um tom */
+  --bar:#f28c28; --bar2:#3987e5; --grid:#1c2943;
+  --r:18px; --r2:12px;
+  --shadow:0 10px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:Barlow,system-ui,sans-serif;font-size:15px;-webkit-font-smoothing:antialiased}
+body{min-height:100vh;background:
+  radial-gradient(900px 500px at 85% -10%,rgba(242,140,40,.16),transparent 60%),
+  radial-gradient(700px 500px at -10% 10%,rgba(57,135,229,.12),transparent 60%),
+  linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px) 0 0/44px 44px,
+  linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px) 0 0/44px 44px,
+  var(--bg)}
+h1,h2,h3,h4,.cond{font-family:"Barlow Semi Condensed",Barlow,sans-serif;letter-spacing:.2px;margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+.hidden{display:none!important}
+.mut{color:var(--mut)} .t2{color:var(--txt2)}
+.nowrap{white-space:nowrap}
+
+/* ---------- LOGIN ---------- */
+#login{min-height:100vh;display:grid;place-items:center;padding:16px}
+.login-box{width:100%;max-width:400px;background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line2);border-radius:22px;padding:34px 30px;box-shadow:var(--shadow);text-align:center}
+.login-box .logo{margin:0 auto 16px;width:64px;height:64px;border-radius:18px}
+.login-box h1{font-size:30px}
+.login-box p{margin:6px 0 22px;color:var(--mut)}
+.login-box label{text-align:left}
+label{display:block;font-size:13px;color:var(--txt2);margin:14px 0 6px;font-weight:600}
+.inp{width:100%;background:var(--bg2);border:1px solid var(--line2);border-radius:12px;padding:11px 13px;outline:none;transition:border-color .15s,box-shadow .15s}
+.inp:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(242,140,40,.18)}
+.err{color:var(--st-rcs);font-size:13px;min-height:18px;margin-top:12px}
+
+/* ---------- BOTÕES ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line2);background:var(--card2);border-radius:12px;padding:9px 15px;cursor:pointer;font-weight:600;white-space:nowrap;transition:.15s}
+.btn:hover{border-color:#3d5280;background:var(--card3)}
+.btn svg{width:17px;height:17px}
+.btn.pri{background:linear-gradient(135deg,var(--acc),#ea6a12);border-color:transparent;color:#fff;box-shadow:0 6px 18px rgba(242,140,40,.3)}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn.full{width:100%;margin-top:22px;padding:12px}
+.btn.sm{padding:6px 11px;font-size:13px;border-radius:10px}
+
+/* ---------- LAYOUT ---------- */
+.wrap{max-width:1360px;margin:0 auto;padding:22px 16px 60px}
+.topbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{width:52px;height:52px;border-radius:15px;background:linear-gradient(135deg,var(--acc),var(--accDeep));display:grid;place-items:center;flex:none;box-shadow:0 8px 22px rgba(242,140,40,.35)}
+.logo svg{width:28px;height:28px}
+.brand h1{font-size:30px;line-height:1}
+.brand .sub{color:var(--mut);font-size:14px;margin-top:5px}
+.live{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#86efac;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);padding:4px 10px;border-radius:99px;margin-left:10px;vertical-align:middle;font-family:Barlow}
+.live i{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 0 rgba(34,197,94,.6);animation:ping 1.8s infinite}
+.live.demo{color:#fcd34d;background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.35)}
+.live.demo i{background:#f59e0b;animation:none}
+@keyframes ping{70%{box-shadow:0 0 0 7px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+.top-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.me{display:flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;border:1px solid var(--line2);border-radius:99px;background:var(--card)}
+.me .av{width:30px;height:30px;font-size:12px}
+.me span{font-size:13px;color:var(--txt2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.tabs{display:flex;gap:4px;margin:22px 0 18px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:5px;width:max-content;max-width:100%;overflow-x:auto}
+.tab{border:0;background:none;padding:9px 16px;border-radius:10px;cursor:pointer;font-weight:600;color:var(--mut);display:flex;align-items:center;gap:8px;white-space:nowrap}
+.tab svg{width:17px;height:17px}
+.tab.on{background:var(--card3);color:var(--txt);box-shadow:inset 0 0 0 1px var(--line2)}
+.tab .badge{background:var(--acc);color:#fff;font-size:11px;font-weight:700;border-radius:99px;padding:1px 7px}
+
+/* ---------- ALERTA ---------- */
+.alert{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:linear-gradient(90deg,rgba(242,140,40,.18),rgba(242,140,40,.04));border:1px solid rgba(242,140,40,.4);border-radius:var(--r);padding:14px 18px;margin-bottom:18px}
+.alert .ic{width:40px;height:40px;border-radius:12px;background:rgba(242,140,40,.2);display:grid;place-items:center;font-size:20px;flex:none}
+.alert b{font-size:16px}
+.alert .btn{margin-left:auto}
+
+/* ---------- KPIs ---------- */
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:18px}
+.kpi{position:relative;overflow:hidden;background:linear-gradient(160deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:var(--r);padding:16px 18px 18px}
+.kpi::after{content:"";position:absolute;right:-30px;top:-30px;width:110px;height:110px;border-radius:50%;background:var(--c);opacity:.09}
+.kpi .row{display:flex;align-items:center;justify-content:space-between}
+.kpi .l{font-size:12.5px;color:var(--txt2);font-weight:600}
+.kpi .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 18%,transparent);color:var(--c)}
+.kpi .ic svg{width:18px;height:18px}
+.kpi .v{font-family:"Barlow Semi Condensed";font-weight:800;font-size:38px;line-height:1;margin-top:12px}
+.kpi .v small{font-size:16px;color:var(--mut);font-weight:700;margin-left:3px}
+.kpi .d{font-size:12.5px;color:var(--mut);margin-top:6px}
+.kpi .d b.up{color:#86efac} .kpi .d b.down{color:#fca5a5}
+
+/* ---------- PAINÉIS / GRÁFICOS ---------- */
+.grid-dash{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+.panel{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;min-width:0}
+.panel h3{font-size:19px}
+.panel .ph{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:14px}
+.panel .ph .mut{font-size:13px}
+.c4{grid-column:span 4}.c5{grid-column:span 5}.c7{grid-column:span 7}.c8{grid-column:span 8}.c6{grid-column:span 6}.c12{grid-column:span 12}
+.donut-wrap{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.donut-wrap svg{flex:none}
+.legend{display:flex;flex-direction:column;gap:10px;flex:1;min-width:150px}
+.legend .li{display:flex;align-items:center;gap:10px;font-size:14px}
+.legend .sw{width:12px;height:12px;border-radius:4px;flex:none}
+.legend .li b{margin-left:auto;font-family:"Barlow Semi Condensed";font-size:18px}
+.legend .li .pc{color:var(--mut);font-size:12.5px;width:40px;text-align:right}
+.hbars{display:flex;flex-direction:column;gap:12px}
+.hb{display:grid;grid-template-columns:minmax(90px,150px) 1fr auto;gap:12px;align-items:center;font-size:14px;cursor:default}
+.hb .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--txt2)}
+.hb .tr{height:12px;background:var(--grid);border-radius:4px;overflow:hidden}
+.hb .fl{height:100%;border-radius:4px;background:var(--bar);transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.hb .vl{font-family:"Barlow Semi Condensed";font-weight:700;font-size:16px;min-width:46px;text-align:right}
+.hb:hover .fl{filter:brightness(1.2)}
+.vchart{position:relative}
+.vchart svg{width:100%;height:240px;display:block;overflow:visible}
+.vchart .bar{fill:var(--bar);transition:filter .15s}
+.vchart .bar:hover{filter:brightness(1.25)}
+.vchart text{fill:var(--mut);font-size:12px;font-family:Barlow}
+.vchart .gl{stroke:var(--grid);stroke-width:1}
+.tip{position:fixed;pointer-events:none;background:#0a1222;border:1px solid var(--line2);border-radius:10px;padding:8px 11px;font-size:13px;z-index:90;box-shadow:var(--shadow);opacity:0;transition:opacity .1s}
+.tip b{display:block;font-size:15px}
+.rank{display:flex;flex-direction:column;gap:6px}
+.rk{display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:12px;background:rgba(255,255,255,.02)}
+.rk:hover{background:rgba(255,255,255,.04)}
+.rk .pos{width:26px;text-align:center;font-family:"Barlow Semi Condensed";font-weight:800;font-size:17px;color:var(--mut)}
+.rk .nm{flex:1;min-width:0}
+.rk .nm b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rk .nm span{font-size:12.5px;color:var(--mut)}
+.rk .pt{font-family:"Barlow Semi Condensed";font-weight:800;font-size:18px;color:var(--acc2)}
+.recent{display:flex;flex-direction:column}
+.rc{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.rc:last-child{border-bottom:0}
+.rc:hover{background:rgba(255,255,255,.02)}
+.rc .tx{flex:1;min-width:0}
+.rc .tx b{font-weight:600}
+.rc .tx div{font-size:13px;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ---------- AVATAR / CHIPS ---------- */
+.av{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:15px;color:#fff;flex:none;background:var(--avc,#3987e5);box-shadow:inset 0 0 0 2px rgba(255,255,255,.12)}
+.gift{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-size:24px;flex:none;background:linear-gradient(135deg,rgba(242,140,40,.22),rgba(242,140,40,.06));border:1px solid rgba(242,140,40,.3)}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:99px;padding:4px 11px;font-size:12.5px;font-weight:700;border:1px solid;white-space:nowrap}
+.chip svg{width:13px;height:13px}
+.s-Recebido{color:#fcd34d;border-color:rgba(245,158,11,.45);background:rgba(245,158,11,.12)}
+.s-Aprovado{color:#93c5fd;border-color:rgba(57,135,229,.5);background:rgba(57,135,229,.13)}
+.s-Entregue{color:#86efac;border-color:rgba(34,197,94,.45);background:rgba(34,197,94,.12)}
+.s-Recusado{color:#fca5a5;border-color:rgba(230,103,103,.45);background:rgba(230,103,103,.12)}
+.ptbadge{display:inline-flex;align-items:baseline;gap:4px;font-family:"Barlow Semi Condensed";font-weight:800;font-size:22px;color:var(--acc2)}
+.ptbadge small{font-family:Barlow;font-size:12px;font-weight:600;color:var(--mut)}
+
+/* ---------- TOOLBAR ---------- */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px;margin-bottom:16px}
+.toolbar .inp{width:auto;flex:1 1 150px;padding:9px 12px}
+.toolbar .search{flex:3 1 260px;padding-left:38px;background:var(--bg2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237f8ca6' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 12px center/17px}
+.seg{display:flex;background:var(--bg2);border:1px solid var(--line2);border-radius:12px;padding:3px}
+.seg button{border:0;background:none;padding:6px 10px;border-radius:9px;cursor:pointer;color:var(--mut);display:grid;place-items:center}
+.seg button.on{background:var(--card3);color:var(--txt)}
+.seg svg{width:17px;height:17px}
+.stpills{display:flex;gap:8px;flex-wrap:wrap;margin:-4px 0 16px}
+.stp{cursor:pointer;opacity:.75}
+.stp.on{opacity:1;box-shadow:0 0 0 2px currentColor}
+.stp b{font-weight:800;margin-left:2px}
+
+/* ---------- CARDS DE SOLICITAÇÃO ---------- */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px}
+.card{position:relative;background:linear-gradient(170deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:var(--r);padding:18px;cursor:pointer;transition:transform .15s,border-color .15s,box-shadow .15s;overflow:hidden}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--sc)}
+.card:hover{transform:translateY(-3px);border-color:var(--line2);box-shadow:var(--shadow)}
+.card.new{animation:glow 3s ease-out}
+@keyframes glow{0%{box-shadow:0 0 0 3px var(--acc),0 0 40px rgba(242,140,40,.5)}100%{box-shadow:none}}
+.card .hd{display:flex;align-items:center;gap:12px}
+.card .hd .who{flex:1;min-width:0}
+.card .hd .who b{display:block;font-size:16px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card .hd .who span{font-size:12.5px;color:var(--mut)}
+.card .prize{display:flex;align-items:center;gap:12px;margin:16px 0 14px;padding:12px;border-radius:14px;background:rgba(255,255,255,.025);border:1px solid var(--line)}
+.card .prize .pn{flex:1;min-width:0}
+.card .prize .pn b{display:block;font-size:16px;font-weight:700;line-height:1.25}
+.card .prize .pn span{font-size:12.5px;color:var(--mut)}
+.saldo{font-size:12.5px;color:var(--mut)}
+.saldo .bar{height:7px;background:var(--grid);border-radius:99px;overflow:hidden;margin:6px 0 4px;display:flex}
+.saldo .bar i{display:block;height:100%;background:var(--acc)}
+.saldo .bar i+i{background:#3b4d70}
+.saldo .lg{display:flex;justify-content:space-between}
+.steps{display:flex;align-items:center;margin-top:16px;padding-top:14px;border-top:1px dashed var(--line2)}
+.steps .sp{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11.5px;color:var(--mut);flex:none;width:62px;text-align:center}
+.steps .dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--line2);display:grid;place-items:center;background:var(--bg2)}
+.steps .dot svg{width:12px;height:12px;opacity:0}
+.steps .ln{flex:1;height:2px;background:var(--line2);margin-bottom:20px}
+.steps .sp.done{color:var(--txt2)}
+.steps .sp.done .dot{background:var(--stc);border-color:var(--stc)}
+.steps .sp.done .dot svg{opacity:1}
+.steps .ln.done{background:var(--stc)}
+.steps .sp.cur{color:var(--txt);font-weight:700}
+.steps .sp.cur .dot{box-shadow:0 0 0 4px color-mix(in srgb,var(--stc) 25%,transparent)}
+.card .meta{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--mut);margin-top:12px}
+
+/* ---------- TABELA ---------- */
+.tablebox{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:960px}
+th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);font-weight:600;padding:13px 16px;background:var(--card2);border-bottom:1px solid var(--line);white-space:nowrap;cursor:pointer;user-select:none}
+td{padding:12px 16px;border-bottom:1px solid var(--line);vertical-align:middle;font-size:14px}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:rgba(255,255,255,.025)}
+tr:last-child td{border-bottom:none}
+.tw{display:flex;align-items:center;gap:10px}
+.tw .av{width:34px;height:34px;font-size:13px}
+.tw b{display:block;font-weight:600}
+.tw span{font-size:12.5px;color:var(--mut)}
+
+/* ---------- KANBAN ---------- */
+.board{display:grid;grid-template-columns:repeat(4,minmax(260px,1fr));gap:14px;overflow-x:auto;padding-bottom:6px}
+.col{background:rgba(15,26,47,.7);border:1px solid var(--line);border-radius:var(--r);padding:12px;min-height:300px;transition:border-color .15s,background .15s}
+.col.over{border-color:var(--acc);background:rgba(242,140,40,.06)}
+.col .ch{display:flex;align-items:center;gap:8px;padding:4px 4px 12px}
+.col .ch b{font-family:"Barlow Semi Condensed";font-size:18px}
+.col .ch .n{margin-left:auto;background:var(--card3);border-radius:99px;padding:1px 9px;font-size:13px;font-weight:700;color:var(--txt2)}
+.col .ch .sd{width:10px;height:10px;border-radius:50%}
+.kc{background:var(--card2);border:1px solid var(--line2);border-radius:14px;padding:12px;margin-bottom:10px;cursor:grab;transition:transform .12s}
+.kc:hover{transform:translateY(-2px);border-color:#3d5280}
+.kc.drag{opacity:.4}
+.kc .top{display:flex;align-items:center;gap:9px}
+.kc .top .av{width:30px;height:30px;font-size:12px}
+.kc .top b{font-size:14px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kc .pz{margin:10px 0 8px;font-weight:600;display:flex;gap:8px;align-items:center}
+.kc .ft{display:flex;justify-content:space-between;font-size:12.5px;color:var(--mut);align-items:center}
+.kc .ft .p{color:var(--acc2);font-family:"Barlow Semi Condensed";font-weight:800;font-size:16px}
+.empty{padding:60px 20px;text-align:center;color:var(--mut);background:var(--card);border:1px dashed var(--line2);border-radius:var(--r)}
+.empty div{font-size:40px;margin-bottom:8px}
+.foot{display:flex;justify-content:space-between;color:var(--mut);font-size:13px;margin-top:14px;flex-wrap:wrap;gap:8px}
+
+/* ---------- DRAWER ---------- */
+.drawer-bg{position:fixed;inset:0;background:rgba(3,7,15,.65);backdrop-filter:blur(3px);z-index:70;opacity:0;pointer-events:none;transition:opacity .2s}
+.drawer-bg.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(520px,100%);background:var(--bg2);border-left:1px solid var(--line2);z-index:71;transform:translateX(100%);transition:transform .25s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
+.drawer.on{transform:none}
+.dh{padding:22px 24px 18px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(242,140,40,.12),transparent)}
+.dh .x{float:right;background:none;border:1px solid var(--line2);border-radius:10px;width:34px;height:34px;cursor:pointer;color:var(--txt2);font-size:18px}
+.dh .gift{width:62px;height:62px;font-size:32px;border-radius:17px;margin-bottom:12px}
+.dh h2{font-size:26px;line-height:1.15;padding-right:40px}
+.dh .sub{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.db{flex:1;overflow:auto;padding:20px 24px}
+.sec{margin-bottom:22px}
+.sec h4{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--mut);margin-bottom:10px;font-family:Barlow;font-weight:700}
+.person{display:flex;gap:14px;align-items:center;padding:14px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
+.person .av{width:52px;height:52px;font-size:18px}
+.person b{font-size:17px;display:block}
+.person span{font-size:13px;color:var(--mut);display:block}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fact{padding:12px 14px;border-radius:13px;background:var(--card);border:1px solid var(--line)}
+.fact .k{font-size:12px;color:var(--mut)}
+.fact .v{font-weight:700;font-size:16px;margin-top:3px;word-break:break-word}
+.fact .v.big{font-family:"Barlow Semi Condensed";font-size:24px;color:var(--acc2)}
+.stbtns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stbtns button{border:1px solid var(--line2);background:var(--card);border-radius:12px;padding:10px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:12.5px;font-weight:700;color:var(--mut)}
+.stbtns button svg{width:18px;height:18px}
+.stbtns button.on{color:var(--stc);border-color:var(--stc);background:color-mix(in srgb,var(--stc) 13%,transparent)}
+textarea.inp{min-height:90px;resize:vertical}
+.tl{position:relative;padding-left:22px}
+.tl::before{content:"";position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:var(--line2)}
+.tl .ev{position:relative;padding:2px 0 14px}
+.tl .ev::before{content:"";position:absolute;left:-21px;top:5px;width:12px;height:12px;border-radius:50%;background:var(--stc,var(--mut));box-shadow:0 0 0 3px var(--bg2)}
+.tl .ev b{font-size:14px}
+.tl .ev div{font-size:12.5px;color:var(--mut)}
+.df{padding:14px 24px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end;background:var(--card)}
+
+.toast{position:fixed;right:18px;bottom:18px;display:flex;gap:12px;align-items:center;background:linear-gradient(135deg,var(--card3),var(--card2));border:1px solid var(--acc);border-radius:16px;padding:14px 18px;box-shadow:0 14px 40px rgba(0,0,0,.5),0 0 30px rgba(242,140,40,.2);z-index:95;max-width:360px;animation:up .35s cubic-bezier(.2,.8,.2,1)}
+.toast .gift{width:42px;height:42px;font-size:22px}
+@keyframes up{from{transform:translateY(30px);opacity:0}}
+
+@media (max-width:1200px){.kpis{grid-template-columns:repeat(3,1fr)}.c4,.c5,.c7,.c8{grid-column:span 6}}
+@media (max-width:820px){.c4,.c5,.c6,.c7,.c8{grid-column:span 12}.board{grid-template-columns:repeat(4,85vw)}}
+@media (max-width:560px){.kpis{grid-template-columns:1fr 1fr;gap:10px}.kpi .v{font-size:30px}.brand h1{font-size:24px}.top-actions{margin-left:0;width:100%}.me{display:none}.cards{grid-template-columns:1fr}.facts{grid-template-columns:1fr}.alert .btn{margin-left:0}.hb{grid-template-columns:90px 1fr auto}}
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<section id="login" class="hidden">
+  <form class="login-box" id="loginForm">
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg></div>
+    <h1>Resgates Kaizen</h1>
+    <p>Nors Sempre Melhor · entre com seu nome e senha</p>
+    <label for="lEmail">Nome</label>
+    <input class="inp" id="lEmail" type="text" autocomplete="username" placeholder="Ex.: Vanderlei Bueno" required>
+    <label for="lPass">Senha</label>
+    <input class="inp" id="lPass" type="password" autocomplete="current-password" required>
+    <button class="btn pri full" type="submit">Entrar</button>
+    <div class="err" id="lErr"></div>
+  </form>
+</section>
+
+<!-- ================= APP ================= -->
+<section id="app" class="hidden">
+  <div class="wrap">
+    <div class="topbar">
+      <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg></div>
+      <div class="brand">
+        <h1>Resgates Kaizen <span class="live" id="liveTag"><i></i><span>Ao vivo</span></span></h1>
+        <div class="sub">Premiações solicitadas pelo Forms · Programa Nors Sempre Melhor</div>
+      </div>
+      <div class="top-actions">
+        <button class="btn" id="btnNotif"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span>Avisos</span></button>
+        <button class="btn" id="btnCsv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Exportar</button>
+        <div class="me"><div class="av" id="meAv">?</div><span id="userTxt"></span></div>
+        <button class="btn" id="btnOut" title="Sair"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
+      </div>
+    </div>
+
+    <nav class="tabs" id="tabs">
+      <button class="tab on" data-tab="painel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Painel</button>
+      <button class="tab" data-tab="lista"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7"/></svg>Solicitações <span class="badge" id="tabBadge">0</span></button>
+      <button class="tab" data-tab="quadro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="5" height="18" rx="1.5"/><rect x="10" y="3" width="5" height="12" rx="1.5"/><rect x="17" y="3" width="4" height="8" rx="1.5"/></svg>Quadro</button>
+    </nav>
+
+    <div class="alert hidden" id="alert">
+      <div class="ic">⏳</div>
+      <div><b id="alertTxt"></b><div class="mut" style="font-size:13.5px">Valide saldo de points e estoque do prêmio e confirme com o colaborador.</div></div>
+      <button class="btn pri sm" id="alertBtn">Ver pendentes →</button>
+    </div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <!-- PAINEL -->
+    <div id="v-painel" class="grid-dash">
+      <div class="panel c4">
+        <div class="ph"><h3>Situação dos pedidos</h3><span class="mut" id="donutSub"></span></div>
+        <div class="donut-wrap" id="donut"></div>
+      </div>
+      <div class="panel c8">
+        <div class="ph"><h3>Solicitações por mês</h3><span class="mut">últimos 12 meses</span></div>
+        <div class="vchart" id="monthly"></div>
+      </div>
+      <div class="panel c6">
+        <div class="ph"><h3>Points resgatados por filial</h3><span class="mut">exceto recusados</span></div>
+        <div class="hbars" id="byFilial"></div>
+      </div>
+      <div class="panel c6">
+        <div class="ph"><h3>Prêmios mais pedidos</h3><span class="mut">nº de solicitações</span></div>
+        <div class="hbars" id="byPremio"></div>
+      </div>
+      <div class="panel c5">
+        <div class="ph"><h3>🏆 Top colaboradores</h3><span class="mut">points resgatados</span></div>
+        <div class="rank" id="ranking"></div>
+      </div>
+      <div class="panel c7">
+        <div class="ph"><h3>Últimas solicitações</h3><button class="btn sm" data-goto="lista">Ver todas →</button></div>
+        <div class="recent" id="recent"></div>
+      </div>
+    </div>
+
+    <!-- LISTA -->
+    <div id="v-lista" class="hidden">
+      <div class="toolbar">
+        <input class="inp search" id="fBusca" placeholder="Buscar colaborador, e-mail, prêmio ou filial…">
+        <select class="inp" id="fFilial"><option value="">Todas as filiais</option></select>
+        <select class="inp" id="fMes"><option value="">Todos os meses</option></select>
+        <select class="inp" id="fOrdem">
+          <option value="criadoEm:-1">Mais recentes</option>
+          <option value="criadoEm:1">Mais antigos</option>
+          <option value="pontosNum:-1">Mais points</option>
+          <option value="colaboradorNome:1">Colaborador A–Z</option>
+        </select>
+        <div class="seg" id="viewSeg">
+          <button class="on" data-view="cards" title="Cartões"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></button>
+          <button data-view="tabela" title="Tabela"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+        </div>
+      </div>
+      <div class="stpills" id="stPills"></div>
+      <div id="listOut"></div>
+      <div class="foot"><span id="countTxt"></span><span>Clique em um pedido para ver detalhes e mudar o status</span></div>
+    </div>
+
+    <!-- QUADRO -->
+    <div id="v-quadro" class="hidden">
+      <div class="mut" style="margin:-4px 0 12px;font-size:13.5px">Arraste os cartões entre as colunas para mudar o status.</div>
+      <div class="board" id="board"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DRAWER ================= -->
+<div class="drawer-bg" id="drawerBg"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="dh">
+    <button class="x" id="dClose" aria-label="Fechar">×</button>
+    <div class="gift" id="dGift"></div>
+    <h2 id="dTitle"></h2>
+    <div class="sub" id="dSub"></div>
+  </div>
+  <div class="db">
+    <div class="sec"><h4>Colaborador</h4><div class="person" id="dPerson"></div></div>
+    <div class="sec"><h4>Pontuação</h4><div class="facts" id="dFacts"></div></div>
+    <div class="sec"><h4>Alterar status</h4><div class="stbtns" id="dStatus"></div></div>
+    <div class="sec"><h4>Observação</h4><textarea class="inp" id="dObs" placeholder="Ex.: prêmio reservado, entrega na filial dia 28/11…"></textarea></div>
+    <div class="sec"><h4>Linha do tempo</h4><div class="tl" id="dTl"></div></div>
+    <div class="sec"><h4>Resposta original do Forms</h4><div class="fact"><div class="v" id="dRaw" style="font-weight:500;font-size:14px"></div><div class="k" id="dRid" style="margin-top:6px"></div></div></div>
+  </div>
+  <div class="df"><button class="btn" id="dCancel">Fechar</button><button class="btn pri" id="dSave">Salvar alterações</button></div>
+</aside>
+
+<div class="tip" id="tip"></div>
+
+<script type="module">
+/* =====================================================================
+   COLE AQUI A URL DO APP DA WEB DO GOOGLE APPS SCRIPT
+   (Apps Script → Implantar → Nova implantação → App da Web → copiar URL)
+   Enquanto estiver "COLE_AQUI", o site abre em MODO DEMONSTRAÇÃO.
+   ===================================================================== */
+const API_URL = "https://script.google.com/macros/s/AKfycbzbTQkM8r1vo2ltTVI-5gFX7zDaRYeCNHs0DLriuGq0ghqDD82C7DGihXytSITrhCj4/exec";
+const ATUALIZAR_A_CADA = 30;   // segundos entre cada verificação de pedidos novos
+/* ===================================================================== */
+
+const DEMO = API_URL === "COLE_AQUI";
+const STATUS = ["Recebido","Aprovado","Entregue","Recusado"];
+const ST = {
+  Recebido:{c:"var(--st-rec)", hex:"#f59e0b", ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>', lbl:"Aguardando validação"},
+  Aprovado:{c:"var(--st-apr)", hex:"#3987e5", ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>', lbl:"Aprovado, aguardando entrega"},
+  Entregue:{c:"var(--st-ent)", hex:"#22c55e", ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7"/></svg>', lbl:"Prêmio entregue"},
+  Recusado:{c:"var(--st-rcs)", hex:"#e66767", ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>', lbl:"Recusado"}
+};
+const AVC = ["#2a78d6","#d95926","#199e70","#c98500","#d55181","#0ca30c","#7a6be0","#d64545"];
+const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>';
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num = v => { const n = parseInt(String(v ?? "").replace(/\D+/g,""),10); return isNaN(n) ? 0 : n; };
+const fmtN = n => Math.round(n).toLocaleString("pt-BR");
+const fmtD = d => d ? d.toLocaleDateString("pt-BR") : "—";
+const fmtDT = d => d ? d.toLocaleDateString("pt-BR") + " às " + d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}) : "—";
+const ago = d => { if(!d) return ""; const s=(Date.now()-d)/1000; if(s<60)return"agora"; if(s<3600)return`há ${Math.floor(s/60)} min`; if(s<86400)return`há ${Math.floor(s/3600)} h`; const dd=Math.floor(s/86400); return dd===1?"ontem":`há ${dd} dias`; };
+const mesKey = d => d ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}` : "";
+const mesLbl = k => { const [y,m] = k.split("-"); return new Date(y,m-1,1).toLocaleDateString("pt-BR",{month:"long",year:"numeric"}); };
+const initials = n => String(n||"?").split(/[\s.@]+/).filter(Boolean).slice(0,2).map(p=>p[0].toUpperCase()).join("");
+const avColor = s => { let h=0; for(const c of String(s)) h=(h*31+c.charCodeAt(0))>>>0; return AVC[h%AVC.length]; };
+const av = (r, cls="") => `<div class="av ${cls}" style="--avc:${avColor(r.colaboradorEmail||r.colaboradorNome)}">${esc(initials(r.colaboradorNome||r.colaboradorEmail))}</div>`;
+const chip = s => `<span class="chip s-${s}">${ST[s].ic}${s}</span>`;
+const GIFTS = [[/miniatura|volvo|caminh|fh ?540|truck/i,"🚛"],[/kit caf|caf[eé]/i,"☕"],[/echo|alexa|caixa de som|speaker/i,"🔊"],[/stanley/i,"🥤"],[/caneca|x[ií]cara|copo/i,"☕"],[/garrafa|squeeze/i,"🥤"],[/mochila|bolsa/i,"🎒"],[/fone|headset|caixa de som|som/i,"🎧"],[/day ?off|folga/i,"🌴"],[/churras/i,"🍖"],[/camis|bon[eé]|jaqueta|moletom/i,"👕"],[/vale|gift|cart[aã]o/i,"💳"],[/rel[oó]gio|smartwatch/i,"⌚"],[/livro/i,"📚"],[/ferrament|kit/i,"🧰"],[/cinema|ingresso/i,"🎬"],[/jantar|restaurante|almo/i,"🍽️"],[/celular|tablet|eletr/i,"📱"]];
+const giftIc = p => (GIFTS.find(([re]) => re.test(p)) || [,"🎁"])[1];
+
+let rows = [], seen = new Set(), firstLoad = true, tab = "painel", view = "cards", stFilter = "", current = null, newIds = [];
+let api = null;
+
+/* ---------- normaliza documento ---------- */
+function norm(id, d){
+  const toDate = v => v?.toDate ? v.toDate() : (v ? new Date(v) : null);
+  return { id, ...d,
+    criadoEm: toDate(d.criadoEm), entregueEm: toDate(d.entregueEm),
+    status: STATUS.includes(d.status) ? d.status : "Recebido",
+    premio: String(d.premio ?? "").trim() || "Prêmio",
+    pontosNum: num(d.pontos), saldoNum: num(d.saldoPontos),
+    historico: Array.isArray(d.historico) ? d.historico : [] };
+}
+
+function onData(list){
+  const novos = firstLoad ? [] : list.filter(r => !seen.has(r.id));
+  list.forEach(r => seen.add(r.id));
+  rows = list; newIds = novos.map(n => n.id);
+  if (current) current = rows.find(r => r.id === current.id) || current;
+  fillFilters(); renderAll();
+  if (novos.length) notify(novos);
+  firstLoad = false;
+}
+
+function fillFilters(){
+  const keep = (sel, values, lbl = v => v) => {
+    const cur = sel.value, first = sel.options[0];
+    sel.innerHTML = ""; sel.add(first);
+    values.forEach(v => sel.add(new Option(lbl(v), v)));
+    sel.value = values.includes(cur) ? cur : "";
+  };
+  keep($("fFilial"), [...new Set(rows.map(r => r.filial).filter(Boolean))].sort());
+  keep($("fMes"), [...new Set(rows.map(r => mesKey(r.criadoEm)).filter(Boolean))].sort().reverse(), mesLbl);
+}
+
+function baseFiltered(){
+  const q = $("fBusca").value.trim().toLowerCase(), fi = $("fFilial").value, me = $("fMes").value;
+  return rows.filter(r => (!fi || r.filial === fi) && (!me || mesKey(r.criadoEm) === me) &&
+    (!q || [r.colaboradorNome, r.colaboradorEmail, r.premio, r.filial].join(" ").toLowerCase().includes(q)));
+}
+function sorted(list){
+  const [k, dir] = $("fOrdem").value.split(":"); const d = +dir;
+  return list.slice().sort((a,b) => { let x=a[k], y=b[k];
+    if (x instanceof Date || y instanceof Date) return ((x?.getTime()??0)-(y?.getTime()??0))*d;
+    if (typeof x === "string") return x.localeCompare(y??"","pt-BR")*d;
+    return ((x??0)-(y??0))*d; });
+}
+
+function renderAll(){
+  renderKpis(); renderAlert();
+  $("tabBadge").textContent = rows.filter(r => r.status === "Recebido").length;
+  if (tab === "painel") renderPainel();
+  if (tab === "lista") renderLista();
+  if (tab === "quadro") renderQuadro();
+}
+
+/* ---------- KPIs ---------- */
+function renderKpis(){
+  const c = s => rows.filter(r => r.status === s).length;
+  const pts = rows.filter(r => r.status !== "Recusado").reduce((s,r) => s + r.pontosNum, 0);
+  const now = new Date(), mk = mesKey(now), pk = mesKey(new Date(now.getFullYear(), now.getMonth()-1, 1));
+  const thisM = rows.filter(r => mesKey(r.criadoEm) === mk).length, prevM = rows.filter(r => mesKey(r.criadoEm) === pk).length;
+  const diff = thisM - prevM;
+  const ent = rows.filter(r => r.status === "Entregue" && r.entregueEm && r.criadoEm);
+  const avgDays = ent.length ? ent.reduce((s,r) => s + (r.entregueEm - r.criadoEm)/864e5, 0) / ent.length : 0;
+  const pessoas = new Set(rows.map(r => r.colaboradorEmail)).size;
+  const I = (p) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+  const k = [
+    {l:"Total de pedidos", v:fmtN(rows.length), d:`<b class="${diff>=0?"up":"down"}">${diff>=0?"▲":"▼"} ${Math.abs(diff)}</b> este mês vs. anterior`, c:"#3987e5", i:I('<path d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7"/>')},
+    {l:"Pendentes", v:fmtN(c("Recebido")), d:"aguardando validação", c:"#f59e0b", i:I('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>')},
+    {l:"Aprovados", v:fmtN(c("Aprovado")), d:"aguardando entrega", c:"#3987e5", i:I('<path d="M20 6 9 17l-5-5"/>')},
+    {l:"Entregues", v:fmtN(c("Entregue")), d:`${rows.length?Math.round(c("Entregue")/rows.length*100):0}% do total`, c:"#22c55e", i:I('<path d="M5 12l5 5L20 7"/><path d="M2 12l5 5" opacity=".5"/>')},
+    {l:"Points resgatados", v:fmtN(pts), d:`${pessoas} colaboradores`, c:"#f28c28", i:I('<path d="m12 2 3 7h7l-5.5 4.5 2 7.5L12 16.5 5.5 21l2-7.5L2 9h7z"/>')},
+    {l:"Tempo até entrega", v:avgDays?avgDays.toFixed(1).replace(".",","):"—", u:avgDays?"dias":"", d:"média dos entregues", c:"#a78bfa", i:I('<path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4a2 2 0 0 0 .6-1.4V2"/>')}
+  ];
+  $("kpis").innerHTML = k.map(x => `<div class="kpi" style="--c:${x.c}"><div class="row"><span class="l">${x.l}</span><span class="ic">${x.i}</span></div><div class="v">${x.v}${x.u?`<small>${x.u}</small>`:""}</div><div class="d">${x.d}</div></div>`).join("");
+}
+function renderAlert(){
+  const n = rows.filter(r => r.status === "Recebido").length;
+  $("alert").classList.toggle("hidden", !n);
+  $("alertTxt").textContent = n === 1 ? "1 solicitação aguardando validação" : `${n} solicitações aguardando validação`;
+}
+
+/* ---------- PAINEL ---------- */
+const tip = $("tip");
+function showTip(e, html){ tip.innerHTML = html; tip.style.opacity = 1; const x = Math.min(e.clientX + 14, innerWidth - tip.offsetWidth - 10); tip.style.left = x + "px"; tip.style.top = (e.clientY - tip.offsetHeight - 12) + "px"; }
+const hideTip = () => tip.style.opacity = 0;
+
+function renderPainel(){
+  /* donut */
+  const tot = rows.length || 1, R = 70, W = 22, C = 2*Math.PI*R, gap = rows.length > 1 ? 3 : 0;
+  let off = 0;
+  const segs = STATUS.map(s => { const n = rows.filter(r => r.status === s).length; const len = n/tot*C;
+    const seg = n ? `<circle r="${R}" cx="90" cy="90" fill="none" stroke="${ST[s].hex}" stroke-width="${W}" stroke-dasharray="${Math.max(len-gap,0.01)} ${C}" stroke-dashoffset="${-off}" transform="rotate(-90 90 90)" data-tip="<b>${n}</b>${s}" style="cursor:pointer"/>` : "";
+    off += len; return seg; }).join("");
+  $("donut").innerHTML = `<svg width="180" height="180" viewBox="0 0 180 180" role="img" aria-label="Distribuição por status">
+      <circle r="${R}" cx="90" cy="90" fill="none" stroke="var(--grid)" stroke-width="${W}"/>${segs}
+      <text x="90" y="88" text-anchor="middle" fill="var(--txt)" font-family="Barlow Semi Condensed" font-weight="800" font-size="38">${rows.length}</text>
+      <text x="90" y="110" text-anchor="middle" fill="var(--mut)" font-size="13" font-family="Barlow">pedidos</text></svg>
+    <div class="legend">${STATUS.map(s => { const n = rows.filter(r => r.status === s).length;
+      return `<div class="li"><span class="sw" style="background:${ST[s].hex}"></span>${s}<b>${n}</b><span class="pc">${Math.round(n/tot*100)}%</span></div>`; }).join("")}</div>`;
+  $("donutSub").textContent = "";
+
+  /* mensal */
+  const now = new Date(), months = [];
+  for (let i = 11; i >= 0; i--) { const d = new Date(now.getFullYear(), now.getMonth()-i, 1); months.push({k:mesKey(d), l:d.toLocaleDateString("pt-BR",{month:"short"}).replace(".",""), y:d.getFullYear()}); }
+  months.forEach(m => { const rr = rows.filter(r => mesKey(r.criadoEm) === m.k); m.n = rr.length; m.p = rr.filter(r=>r.status!=="Recusado").reduce((s,r)=>s+r.pontosNum,0); });
+  const el = $("monthly"), w = Math.max(el.clientWidth, 300), h = 240, pl = 30, pb = 26, pt = 18;
+  const max = Math.max(4, ...months.map(m => m.n)), step = Math.ceil(max/4), top = step*4;
+  const bw = (w - pl) / months.length, barW = Math.min(38, bw*0.6);
+  let svg = "";
+  for (let i = 0; i <= 4; i++) { const y = pt + (h-pt-pb) * (1 - i/4); svg += `<line class="gl" x1="${pl}" x2="${w}" y1="${y}" y2="${y}"/><text x="${pl-8}" y="${y+4}" text-anchor="end">${i*step}</text>`; }
+  months.forEach((m,i) => { const x = pl + bw*i + (bw-barW)/2, bh = (h-pt-pb) * m.n/top, y = h - pb - bh;
+    if (m.n) svg += `<path class="bar" d="M${x},${h-pb} V${y+4} Q${x},${y} ${x+4},${y} H${x+barW-4} Q${x+barW},${y} ${x+barW},${y+4} V${h-pb} Z" data-tip="<b>${m.n} pedido${m.n>1?"s":""}</b>${esc(mesLbl(m.k))} · ${fmtN(m.p)} points"/>`;
+    if (m.n && i === months.length-1) svg += `<text x="${x+barW/2}" y="${y-7}" text-anchor="middle" fill="var(--txt)" font-weight="700">${m.n}</text>`;
+    svg += `<rect x="${pl+bw*i}" y="${pt}" width="${bw}" height="${h-pt-pb}" fill="transparent" data-tip="<b>${m.n} pedido${m.n!==1?"s":""}</b>${esc(mesLbl(m.k))} · ${fmtN(m.p)} points"/>`;
+    svg += `<text x="${x+barW/2}" y="${h-6}" text-anchor="middle">${m.l}</text>`; });
+  el.innerHTML = `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Solicitações por mês">${svg}</svg>`;
+
+  /* barras horizontais */
+  const hbars = (id, map, unit, max = 7) => {
+    const arr = Object.entries(map).sort((a,b) => b[1]-a[1]).slice(0, max), mx = arr[0]?.[1] || 1;
+    $(id).innerHTML = arr.length ? arr.map(([n,v]) => `<div class="hb" data-tip="<b>${fmtN(v)} ${unit}</b>${esc(n)}"><span class="nm">${esc(n)}</span><div class="tr"><div class="fl" style="width:${v/mx*100}%"></div></div><span class="vl">${fmtN(v)}</span></div>`).join("") : `<div class="mut">Sem dados ainda.</div>`;
+  };
+  const byF = {}, byP = {};
+  rows.forEach(r => { if (r.status !== "Recusado") byF[r.filial || "Sem filial"] = (byF[r.filial || "Sem filial"]||0) + r.pontosNum; byP[r.premio] = (byP[r.premio]||0) + 1; });
+  hbars("byFilial", byF, "points"); hbars("byPremio", byP, "pedidos");
+
+  /* ranking */
+  const byC = {};
+  rows.filter(r => r.status !== "Recusado").forEach(r => { const k = r.colaboradorEmail; byC[k] ??= {r, p:0, n:0}; byC[k].p += r.pontosNum; byC[k].n++; });
+  const medal = ["🥇","🥈","🥉"];
+  $("ranking").innerHTML = Object.values(byC).sort((a,b) => b.p-a.p).slice(0,6).map((x,i) =>
+    `<div class="rk"><span class="pos">${medal[i]||i+1}</span>${av(x.r)}<div class="nm"><b>${esc(x.r.colaboradorNome||x.r.colaboradorEmail)}</b><span>${esc(x.r.filial||"")} · ${x.n} resgate${x.n>1?"s":""}</span></div><span class="pt">${fmtN(x.p)}</span></div>`).join("") || `<div class="mut">Sem dados ainda.</div>`;
+
+  /* recentes */
+  $("recent").innerHTML = rows.slice().sort((a,b) => (b.criadoEm||0)-(a.criadoEm||0)).slice(0,6).map(r =>
+    `<div class="rc" data-id="${esc(r.id)}">${av(r)}<div class="tx"><b>${esc(r.colaboradorNome||r.colaboradorEmail)}</b> <span class="mut">pediu</span> <b>${giftIc(r.premio)} ${esc(r.premio)}</b><div>${esc(r.filial||"")} · ${ago(r.criadoEm)} · ${fmtN(r.pontosNum)} points</div></div>${chip(r.status)}</div>`).join("") || `<div class="mut">Nenhuma solicitação ainda.</div>`;
+}
+
+/* ---------- LISTA ---------- */
+function stepper(s){
+  if (s === "Recusado") return `<div class="steps" style="--stc:${ST.Recusado.hex}"><div class="sp done cur"><div class="dot">${CHECK}</div>Recebido</div><div class="ln done"></div><div class="sp done cur"><div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" style="opacity:1"><path d="M18 6 6 18M6 6l12 12"/></svg></div>Recusado</div><div class="ln" style="opacity:0"></div><div class="sp" style="opacity:0"></div></div>`;
+  const idx = ["Recebido","Aprovado","Entregue"].indexOf(s);
+  return `<div class="steps" style="--stc:${ST[s].hex}">` + ["Recebido","Aprovado","Entregue"].map((x,i) =>
+    (i ? `<div class="ln ${i<=idx?"done":""}"></div>` : "") + `<div class="sp ${i<=idx?"done":""} ${i===idx?"cur":""}"><div class="dot">${CHECK}</div>${x}</div>`).join("") + `</div>`;
+}
+function saldoBar(r){
+  if (!r.saldoNum) return `<div class="saldo">Saldo não informado</div>`;
+  const usa = Math.min(r.pontosNum, r.saldoNum), resto = Math.max(r.saldoNum - r.pontosNum, 0), ok = r.saldoNum >= r.pontosNum;
+  return `<div class="saldo"><div class="lg"><span>Saldo do colaborador</span><b style="color:${ok?"var(--txt2)":"#fca5a5"}">${fmtN(r.saldoNum)} pts${ok?"":" ⚠ insuficiente"}</b></div>
+    <div class="bar"><i style="width:${usa/r.saldoNum*100}%"></i><i style="width:${resto/r.saldoNum*100}%"></i></div>
+    <div class="lg"><span>usa ${fmtN(r.pontosNum)}</span><span>sobram ${fmtN(resto)}</span></div></div>`;
+}
+function renderLista(){
+  const base = baseFiltered();
+  $("stPills").innerHTML = [["", "Todos", base.length], ...STATUS.map(s => [s, s, base.filter(r => r.status === s).length])].map(([v,l,n]) =>
+    `<span class="chip stp ${v?"s-"+v:""} ${stFilter===v?"on":""}" data-st="${v}" style="${v?"":"color:var(--txt2);border-color:var(--line2)"}">${v?ST[v].ic:""}${l} <b>${n}</b></span>`).join("");
+  const list = sorted(base.filter(r => !stFilter || r.status === stFilter));
+  $("countTxt").textContent = `${list.length} de ${rows.length} solicitações`;
+  if (!list.length) { $("listOut").innerHTML = `<div class="empty"><div>🔍</div>Nenhuma solicitação encontrada com esses filtros.</div>`; return; }
+  if (view === "cards") {
+    $("listOut").innerHTML = `<div class="cards">${list.map(r => `
+      <div class="card ${newIds.includes(r.id)?"new":""}" data-id="${esc(r.id)}" style="--sc:${ST[r.status].hex}">
+        <div class="hd">${av(r)}<div class="who"><b>${esc(r.colaboradorNome||r.colaboradorEmail)}</b><span>${esc(r.cargo?r.cargo+" · ":"")}${esc(r.filial||"")}</span></div>${chip(r.status)}</div>
+        <div class="prize"><div class="gift">${giftIc(r.premio)}</div><div class="pn"><b>${esc(r.premio)}</b><span>prêmio escolhido</span></div><div class="ptbadge">${fmtN(r.pontosNum)}<small>pts</small></div></div>
+        ${saldoBar(r)}
+        ${stepper(r.status)}
+        <div class="meta"><span>📅 ${fmtDT(r.criadoEm)}</span><span>${ago(r.criadoEm)}${r.observacao?" · 💬":""}</span></div>
+      </div>`).join("")}</div>`;
+  } else {
+    $("listOut").innerHTML = `<div class="tablebox"><table><thead><tr><th>Data</th><th>Colaborador</th><th>Filial</th><th>Prêmio</th><th>Points</th><th>Saldo</th><th>Status</th></tr></thead><tbody>${list.map(r => `
+      <tr data-id="${esc(r.id)}"><td class="nowrap">${fmtDT(r.criadoEm)}<div class="mut" style="font-size:12px">${ago(r.criadoEm)}</div></td>
+      <td><div class="tw">${av(r)}<div><b>${esc(r.colaboradorNome||r.colaboradorEmail)}</b><span>${esc(r.colaboradorEmail)}</span></div></div></td>
+      <td>${esc(r.filial)||"—"}</td><td>${giftIc(r.premio)} ${esc(r.premio)}${r.observacao?' <span title="'+esc(r.observacao)+'">💬</span>':""}</td>
+      <td><span class="ptbadge" style="font-size:18px">${fmtN(r.pontosNum)}</span></td><td class="t2">${r.saldoNum?fmtN(r.saldoNum):"—"}</td><td>${chip(r.status)}</td></tr>`).join("")}</tbody></table></div>`;
+  }
+}
+
+/* ---------- QUADRO ---------- */
+function renderQuadro(){
+  const base = baseFiltered();
+  $("board").innerHTML = STATUS.map(s => { const items = sorted(base.filter(r => r.status === s));
+    return `<div class="col" data-col="${s}"><div class="ch"><span class="sd" style="background:${ST[s].hex}"></span><b>${s}</b><span class="n">${items.length}</span></div>
+      ${items.map(r => `<div class="kc" draggable="true" data-id="${esc(r.id)}"><div class="top">${av(r)}<b>${esc(r.colaboradorNome||r.colaboradorEmail)}</b></div>
+        <div class="pz">${giftIc(r.premio)} ${esc(r.premio)}</div><div class="ft"><span>${esc(r.filial||"")} · ${fmtD(r.criadoEm)}</span><span class="p">${fmtN(r.pontosNum)}</span></div></div>`).join("")
+        || `<div class="mut" style="text-align:center;padding:30px 0;font-size:13px">Arraste aqui</div>`}</div>`; }).join("");
+}
+let dragId = null;
+$("board").addEventListener("dragstart", e => { const k = e.target.closest(".kc"); if (!k) return; dragId = k.dataset.id; k.classList.add("drag"); e.dataTransfer.effectAllowed = "move"; });
+$("board").addEventListener("dragend", e => { e.target.closest(".kc")?.classList.remove("drag"); document.querySelectorAll(".col.over").forEach(c => c.classList.remove("over")); });
+$("board").addEventListener("dragover", e => { const c = e.target.closest(".col"); if (!c) return; e.preventDefault(); document.querySelectorAll(".col.over").forEach(x => x !== c && x.classList.remove("over")); c.classList.add("over"); });
+$("board").addEventListener("drop", e => { const c = e.target.closest(".col"); if (!c || !dragId) return; e.preventDefault(); c.classList.remove("over");
+  const r = rows.find(x => x.id === dragId); dragId = null; if (r && r.status !== c.dataset.col) setStatus(r, c.dataset.col).catch(err => alert("Erro ao salvar: " + err.message)); });
+
+/* ---------- AÇÕES ---------- */
+async function setStatus(r, status, observacao = r.observacao ?? ""){
+  const quem = $("userTxt").dataset.user || "admin";
+  const historico = r.status === status ? r.historico : [...r.historico, { em: new Date().toISOString(), por: quem, status }];
+  const data = { status, observacao, historico };
+  if (status === "Entregue" && !r.entregueEm) data.entregueEm = new Date().toISOString();
+  await api.save(r.id, data);
+}
+
+/* ---------- DRAWER ---------- */
+let dStatus = null;
+function openDrawer(r){
+  current = r; dStatus = r.status;
+  $("dGift").textContent = giftIc(r.premio);
+  $("dTitle").textContent = r.premio;
+  $("dSub").innerHTML = `${chip(r.status)}<span class="mut">${ST[r.status].lbl} · ${ago(r.criadoEm)}</span>`;
+  $("dPerson").innerHTML = `${av(r)}<div><b>${esc(r.colaboradorNome||"—")}</b><span>${esc(r.colaboradorEmail)}</span><span>${esc([r.cargo, r.filial].filter(Boolean).join(" · "))}</span></div>`;
+  const ok = !r.saldoNum || r.saldoNum >= r.pontosNum;
+  $("dFacts").innerHTML = `<div class="fact"><div class="k">Points do prêmio</div><div class="v big">${fmtN(r.pontosNum)}</div></div>
+    <div class="fact"><div class="k">Saldo no momento do pedido</div><div class="v big" style="color:${ok?"var(--txt)":"#fca5a5"}">${r.saldoNum?fmtN(r.saldoNum):"—"}</div></div>
+    <div class="fact"><div class="k">Saldo após resgate</div><div class="v">${r.saldoNum?fmtN(r.saldoNum-r.pontosNum):"—"} ${ok?"":"<span style='color:#fca5a5'>⚠ insuficiente</span>"}</div></div>
+    <div class="fact"><div class="k">Solicitado em</div><div class="v">${fmtDT(r.criadoEm)}</div></div>`;
+  drawStatusBtns();
+  $("dObs").value = r.observacao ?? "";
+  const ev = [{status:"Recebido", em:r.criadoEm?.toISOString(), por:"Formulário Microsoft Forms"}, ...r.historico];
+  $("dTl").innerHTML = ev.slice().reverse().map(h => `<div class="ev" style="--stc:${ST[h.status]?.hex||"#7f8ca6"}"><b>${esc(h.status)}</b><div>${h.em?fmtDT(new Date(h.em)):""} · ${esc(h.por)}</div></div>`).join("");
+  $("dRaw").textContent = r.premioCompleto || r.premio;
+  $("dRid").textContent = r.formResponseId ? "ID da resposta: " + r.formResponseId : "";
+  $("drawer").classList.add("on"); $("drawerBg").classList.add("on"); $("drawer").setAttribute("aria-hidden","false");
+}
+function drawStatusBtns(){
+  $("dStatus").innerHTML = STATUS.map(s => `<button class="${s===dStatus?"on":""}" data-s="${s}" style="--stc:${ST[s].hex}">${ST[s].ic}${s}</button>`).join("");
+}
+$("dStatus").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; dStatus = b.dataset.s; drawStatusBtns(); });
+const closeDrawer = () => { $("drawer").classList.remove("on"); $("drawerBg").classList.remove("on"); $("drawer").setAttribute("aria-hidden","true"); current = null; };
+$("dClose").onclick = $("dCancel").onclick = $("drawerBg").onclick = closeDrawer;
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
+$("dSave").onclick = async () => {
+  try { await setStatus(current, dStatus, $("dObs").value.trim()); closeDrawer(); toast("✅", "Alterações salvas"); }
+  catch (err) { alert("Erro ao salvar: " + err.message); }
+};
+
+/* ---------- EVENTOS GERAIS ---------- */
+document.addEventListener("click", e => {
+  const it = e.target.closest("[data-id]");
+  if (it && !it.classList.contains("kc") && !e.target.closest(".drawer")) { const r = rows.find(x => x.id === it.dataset.id); if (r) openDrawer(r); return; }
+  const kc = e.target.closest(".kc"); if (kc) { const r = rows.find(x => x.id === kc.dataset.id); if (r) openDrawer(r); return; }
+  const g = e.target.closest("[data-goto]"); if (g) setTab(g.dataset.goto);
+  const sp = e.target.closest(".stp"); if (sp) { stFilter = sp.dataset.st; renderLista(); }
+});
+document.addEventListener("mousemove", e => { const t = e.target.closest?.("[data-tip]"); t ? showTip(e, t.dataset.tip) : hideTip(); });
+function setTab(t){
+  tab = t;
+  document.querySelectorAll(".tab").forEach(b => b.classList.toggle("on", b.dataset.tab === t));
+  ["painel","lista","quadro"].forEach(v => $("v-"+v).classList.toggle("hidden", v !== t));
+  renderAll();
+}
+$("tabs").addEventListener("click", e => { const b = e.target.closest(".tab"); if (b) setTab(b.dataset.tab); });
+$("alertBtn").onclick = () => { stFilter = "Recebido"; setTab("lista"); };
+$("viewSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; view = b.dataset.view; $("viewSeg").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); renderLista(); });
+["fBusca","fFilial","fMes","fOrdem"].forEach(id => $(id).addEventListener("input", () => { tab === "quadro" ? renderQuadro() : renderLista(); }));
+let rT; addEventListener("resize", () => { clearTimeout(rT); rT = setTimeout(() => tab === "painel" && renderPainel(), 150); });
+
+$("btnCsv").onclick = () => {
+  const cols = ["Data","Colaborador","E-mail","Cargo","Filial","Prêmio","Points","Saldo","Status","Observação","Entregue em"];
+  const lines = sorted(baseFiltered()).map(r => [fmtDT(r.criadoEm), r.colaboradorNome, r.colaboradorEmail, r.cargo, r.filial, r.premio,
+    r.pontosNum, r.saldoNum, r.status, r.observacao, r.entregueEm ? fmtDT(r.entregueEm) : ""]);
+  const csv = [cols, ...lines].map(l => l.map(v => `"${String(v ?? "").replace(/"/g,'""')}"`).join(";")).join("\r\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob(["﻿" + csv], {type:"text/csv;charset=utf-8"}));
+  a.download = `resgates-kaizen-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+};
+$("btnNotif").onclick = async () => {
+  if (!("Notification" in window)) return alert("Seu navegador não suporta notificações.");
+  const p = await Notification.requestPermission();
+  $("btnNotif").querySelector("span").textContent = p === "granted" ? "Avisos ativos" : "Avisos bloqueados";
+};
+function toast(ic, html){
+  const t = document.createElement("div"); t.className = "toast";
+  t.innerHTML = `<div class="gift">${ic}</div><div>${html}</div>`;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 6000);
+}
+function notify(novos){
+  const r = novos[0];
+  const msg = novos.length > 1 ? `${novos.length} novas solicitações de resgate` : `${r.colaboradorNome || r.colaboradorEmail} pediu ${r.premio} (${fmtN(r.pontosNum)} pts)`;
+  toast(giftIc(r.premio), `<b>Nova solicitação!</b><div class="mut" style="margin-top:3px;font-size:13.5px">${esc(msg)}</div>`);
+  if (window.Notification?.permission === "granted") new Notification("Resgate Kaizen", { body: msg });
+}
+function setUser(email){ $("userTxt").textContent = email; $("userTxt").dataset.user = email; $("meAv").textContent = initials(email); $("meAv").style.setProperty("--avc", avColor(email)); }
+
+/* =====================================================================
+   GOOGLE APPS SCRIPT (planilha) – verifica pedidos novos a cada X segundos
+   ===================================================================== */
+function startApi(){
+  let senha = "", timer = null, quem = "";
+  try { senha = sessionStorage.getItem("rk_senha") || ""; quem = localStorage.getItem("rk_quem") || ""; } catch {}
+  $("lEmail").value = quem;
+  const call = async (body) => {
+    const r = await fetch(API_URL, { method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body: JSON.stringify({ senha, ...body }) });
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.erro === "senha" ? "senha" : j.erro);
+    return j;
+  };
+  const carregar = async () => {
+    const j = await call({ acao:"listar" });
+    onData(j.itens.map(d => norm(d.id, d)));
+  };
+  api = {
+    save: async (id, data) => { await call({ acao:"atualizar", id, status:data.status, observacao:data.observacao, por:quem }); await carregar(); },
+    logout: () => { try { sessionStorage.removeItem("rk_senha"); } catch {} location.reload(); }
+  };
+  const entrar = async () => {
+    try {
+      await carregar();
+      try { sessionStorage.setItem("rk_senha", senha); localStorage.setItem("rk_quem", quem); } catch {}
+      setUser(quem); $("login").classList.add("hidden"); $("app").classList.remove("hidden");
+      clearInterval(timer); timer = setInterval(() => carregar().catch(() => {}), ATUALIZAR_A_CADA * 1000);
+    } catch (err) {
+      $("login").classList.remove("hidden"); $("app").classList.add("hidden");
+      $("lErr").textContent = err.message === "senha" ? "Senha incorreta." : "Não foi possível conectar: " + err.message;
+    }
+  };
+  $("loginForm").onsubmit = e => { e.preventDefault(); $("lErr").textContent = ""; quem = $("lEmail").value.trim(); senha = $("lPass").value; entrar(); };
+  if (senha && quem) entrar(); else $("login").classList.remove("hidden");
+}
+
+/* =====================================================================
+   MODO DEMONSTRAÇÃO (sem Firebase configurado)
+   ===================================================================== */
+function startDemo(){
+  const tag = $("liveTag"); tag.classList.add("demo"); tag.querySelector("span").textContent = "Demonstração";
+  setUser("demo@nors.com");
+  const nomes = [["Ana Souza","Cuiabá","Consultora de Serviços"],["Carlos Lima","Rondonópolis","Mecânico"],["Juliana Martins","Sinop","Assistente Administrativa"],["Pedro Alves","Cuiabá","Eletricista"],["Marcos Ribeiro","Primavera do Leste","Mecânico"],["Fernanda Costa","Sinop","Analista de Peças"],["Rafael Nunes","Rondonópolis","Líder de Oficina"],["Bruna Oliveira","Cuiabá","Vendedora de Peças"],["Thiago Rocha","Sinop","Mecânico"]];
+  const premios = [["Caneca térmica Nors",150],["Mochila executiva",600],["Fone Bluetooth",800],["Garrafa térmica",250],["Day off",1500],["Kit churrasco",900],["Camiseta Nors",200],["Vale-presente R$100",1000]];
+  const mk = (i, daysAgo, st) => { const [n,f,c] = nomes[(i*7) % nomes.length], [p,pt] = premios[(i*5+i%3) % premios.length];
+    const em = n.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").split(" ")[0][0] + n.toLowerCase().split(" ")[1] + "@nors.com";
+    const cri = new Date(Date.now() - daysAgo*864e5);
+    const h = []; const add = (s, d) => h.push({ em:new Date(cri.getTime()+d*864e5).toISOString(), por:"ltimoteo@nors.com", status:s });
+    if (st !== "Recebido") add(st === "Recusado" ? "Recusado" : "Aprovado", 1.2);
+    if (st === "Entregue") add("Entregue", 2 + (i%5));
+    return norm("demo"+i, { colaboradorNome:n, colaboradorEmail:em, cargo:c, filial:f, premio:p, premioCompleto:`${p} (IMAGEM ${i%8+1}) ${pt}`,
+      pontos:String(pt), saldoPontos:String(i%11===3 ? pt-80 : pt + 120 + (i*137)%1400), status: st, formResponseId: 100+i, criadoEm: cri, historico: h,
+      entregueEm: st === "Entregue" ? new Date(cri.getTime()+(2+i%5)*864e5) : null, observacao: i%6===0 ? "Prêmio reservado no estoque da filial." : "" }); };
+  const store = [];
+  for (let i = 0; i < 46; i++) { const d = Math.pow(i/46, 1.15) * 330 + (i%3); const st = d < 4 ? "Recebido" : d < 15 ? (i%3 ? "Aprovado" : "Recebido") : (i%9===4 ? "Recusado" : "Entregue"); store.push(mk(i, d, st)); }
+  api = { save: async (id, data) => { const r = store.find(r => r.id === id); Object.assign(r, data); if (data.entregueEm) r.entregueEm = new Date(data.entregueEm); onData([...store]); }, logout: () => location.reload() };
+  $("app").classList.remove("hidden");
+  onData([...store]);
+  setTimeout(() => { const n = mk(77, 0, "Recebido"); n.id = "demoNovo"; n.criadoEm = new Date(); store.unshift(n); onData([...store]); }, 5000);
+}
+
+$("btnOut").onclick = () => api?.logout();
+if (DEMO) startDemo(); else startApi();
+</script>
+</body>
+</html>
