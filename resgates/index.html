@@ -452,7 +452,7 @@ const GIFTS = [[/miniatura|volvo|caminh|fh ?540|truck/i,"🚛"],[/kit caf|caf[e�
 const giftIc = p => (GIFTS.find(([re]) => re.test(p)) || [,"🎁"])[1];
 
 let rows = [], seen = new Set(), firstLoad = true, tab = "painel", view = "cards", stFilter = "", current = null, newIds = [];
-let api = null;
+let api = null, pendentes = 0;
 
 /* ---------- normaliza documento ---------- */
 function norm(id, d){
@@ -644,7 +644,7 @@ $("board").addEventListener("dragstart", e => { const k = e.target.closest(".kc"
 $("board").addEventListener("dragend", e => { e.target.closest(".kc")?.classList.remove("drag"); document.querySelectorAll(".col.over").forEach(c => c.classList.remove("over")); });
 $("board").addEventListener("dragover", e => { const c = e.target.closest(".col"); if (!c) return; e.preventDefault(); document.querySelectorAll(".col.over").forEach(x => x !== c && x.classList.remove("over")); c.classList.add("over"); });
 $("board").addEventListener("drop", e => { const c = e.target.closest(".col"); if (!c || !dragId) return; e.preventDefault(); c.classList.remove("over");
-  const r = rows.find(x => x.id === dragId); dragId = null; if (r && r.status !== c.dataset.col) setStatus(r, c.dataset.col).catch(err => alert("Erro ao salvar: " + err.message)); });
+  const r = rows.find(x => x.id === dragId); dragId = null; if (r && r.status !== c.dataset.col) setStatus(r, c.dataset.col).catch(err => toast("⚠️", `<b>Não salvou</b><div class="mut" style="font-size:13px">${esc(err.message)}. A alteração foi desfeita.</div>`, 8000)); });
 
 /* ---------- AÇÕES ---------- */
 async function setStatus(r, status, observacao = r.observacao ?? ""){
@@ -652,7 +652,14 @@ async function setStatus(r, status, observacao = r.observacao ?? ""){
   const historico = r.status === status ? r.historico : [...r.historico, { em: new Date().toISOString(), por: quem, status }];
   const data = { status, observacao, historico };
   if (status === "Entregue" && !r.entregueEm) data.entregueEm = new Date().toISOString();
-  await api.save(r.id, data);
+  // atualiza a tela NA HORA e salva na planilha em segundo plano
+  const antes = { status: r.status, observacao: r.observacao, historico: r.historico, entregueEm: r.entregueEm };
+  Object.assign(r, data, data.entregueEm ? { entregueEm: new Date(data.entregueEm) } : {});
+  renderAll();
+  pendentes++;
+  try { await api.save(r.id, data); }
+  catch (err) { Object.assign(r, antes); renderAll(); throw err; }
+  finally { pendentes--; }
 }
 
 /* ---------- DRAWER ---------- */
@@ -683,9 +690,13 @@ $("dStatus").addEventListener("click", e => { const b = e.target.closest("button
 const closeDrawer = () => { $("drawer").classList.remove("on"); $("drawerBg").classList.remove("on"); $("drawer").setAttribute("aria-hidden","true"); current = null; };
 $("dClose").onclick = $("dCancel").onclick = $("drawerBg").onclick = closeDrawer;
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
-$("dSave").onclick = async () => {
-  try { await setStatus(current, dStatus, $("dObs").value.trim()); closeDrawer(); toast("✅", "Alterações salvas"); }
-  catch (err) { alert("Erro ao salvar: " + err.message); }
+$("dSave").onclick = () => {
+  const r = current, st = dStatus, obs = $("dObs").value.trim();
+  closeDrawer();
+  const t = toast("⏳", "<b>Salvando…</b>", 0);
+  setStatus(r, st, obs)
+    .then(() => toast("✅", `<b>Salvo</b><div class="mut" style="font-size:13px">${esc(r.colaboradorNome || "")} · ${esc(st)}</div>`, 2500, t))
+    .catch(err => toast("⚠️", `<b>Não salvou</b><div class="mut" style="font-size:13px">${esc(err.message)}. A alteração foi desfeita, tente de novo.</div>`, 8000, t));
 };
 
 /* ---------- EVENTOS GERAIS ---------- */
@@ -723,10 +734,12 @@ $("btnNotif").onclick = async () => {
   const p = await Notification.requestPermission();
   $("btnNotif").querySelector("span").textContent = p === "granted" ? "Avisos ativos" : "Avisos bloqueados";
 };
-function toast(ic, html){
-  const t = document.createElement("div"); t.className = "toast";
+function toast(ic, html, ms = 6000, reuse = null){
+  const t = reuse || document.createElement("div"); t.className = "toast";
   t.innerHTML = `<div class="gift">${ic}</div><div>${html}</div>`;
-  document.body.appendChild(t); setTimeout(() => t.remove(), 6000);
+  if (!reuse) document.body.appendChild(t);
+  clearTimeout(t._tm); if (ms) t._tm = setTimeout(() => t.remove(), ms);
+  return t;
 }
 function notify(novos){
   const r = novos[0];
@@ -751,10 +764,11 @@ function startApi(){
   };
   const carregar = async () => {
     const j = await call({ acao:"listar" });
+    if (pendentes) return;              // não sobrescreve uma alteração que ainda está salvando
     onData(j.itens.map(d => norm(d.id, d)));
   };
   api = {
-    save: async (id, data) => { await call({ acao:"atualizar", id, status:data.status, observacao:data.observacao, por:quem }); await carregar(); },
+    save: (id, data) => call({ acao:"atualizar", id, status:data.status, observacao:data.observacao, por:quem }),
     logout: () => { try { sessionStorage.removeItem("rk_senha"); } catch {} location.reload(); }
   };
   const entrar = async () => {
