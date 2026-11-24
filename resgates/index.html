@@ -435,10 +435,11 @@ const ago = d => { if(!d) return ""; const s=(Date.now()-d)/1000; if(s<60)return
 const mesKey = d => d ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}` : "";
 const mesLbl = k => { const [y,m] = k.split("-"); return new Date(y,m-1,1).toLocaleDateString("pt-BR",{month:"long",year:"numeric"}); };
 const initials = n => String(n||"?").split(/[\s.@]+/).filter(Boolean).slice(0,2).map(p=>p[0].toUpperCase()).join("");
+const pessoaKey = r => (r.colaboradorEmail || r.colaboradorNome || "").toLowerCase().trim();
 const avColor = s => { let h=0; for(const c of String(s)) h=(h*31+c.charCodeAt(0))>>>0; return AVC[h%AVC.length]; };
 const av = (r, cls="") => `<div class="av ${cls}" style="--avc:${avColor(r.colaboradorEmail||r.colaboradorNome)}">${esc(initials(r.colaboradorNome||r.colaboradorEmail))}</div>`;
 const chip = s => `<span class="chip s-${s}">${ST[s].ic}${s}</span>`;
-const GIFTS = [[/miniatura|volvo|caminh|fh ?540|truck/i,"🚛"],[/kit caf|caf[eé]/i,"☕"],[/echo|alexa|caixa de som|speaker/i,"🔊"],[/stanley/i,"🥤"],[/caneca|x[ií]cara|copo/i,"☕"],[/garrafa|squeeze/i,"🥤"],[/mochila|bolsa/i,"🎒"],[/fone|headset|caixa de som|som/i,"🎧"],[/day ?off|folga/i,"🌴"],[/churras/i,"🍖"],[/camis|bon[eé]|jaqueta|moletom/i,"👕"],[/vale|gift|cart[aã]o/i,"💳"],[/rel[oó]gio|smartwatch/i,"⌚"],[/livro/i,"📚"],[/ferrament|kit/i,"🧰"],[/cinema|ingresso/i,"🎬"],[/jantar|restaurante|almo/i,"🍽️"],[/celular|tablet|eletr/i,"📱"]];
+const GIFTS = [[/miniatura|volvo|caminh|fh ?540|truck/i,"🚛"],[/kit caf|caf[eé]/i,"☕"],[/echo|alexa|caixa de som|speaker/i,"🔊"],[/stanley/i,"🥤"],[/terer[eé]|cuia/i,"🧉"],[/necessaire|n[eé]cessaire/i,"👝"],[/caneca|x[ií]cara|copo/i,"☕"],[/garrafa|squeeze/i,"🥤"],[/mochila|bolsa/i,"🎒"],[/fone|headset|caixa de som|som/i,"🎧"],[/day ?off|folga/i,"🌴"],[/churras/i,"🍖"],[/camis|bon[eé]|jaqueta|moletom/i,"👕"],[/vale|gift|cart[aã]o/i,"💳"],[/rel[oó]gio|smartwatch/i,"⌚"],[/livro/i,"📚"],[/ferrament|kit/i,"🧰"],[/cinema|ingresso/i,"🎬"],[/jantar|restaurante|almo/i,"🍽️"],[/celular|tablet|eletr/i,"📱"]];
 const giftIc = p => (GIFTS.find(([re]) => re.test(p)) || [,"🎁"])[1];
 
 let rows = [], seen = new Set(), firstLoad = true, tab = "painel", view = "cards", stFilter = "", current = null, newIds = [];
@@ -506,7 +507,7 @@ function renderKpis(){
   const diff = thisM - prevM;
   const ent = rows.filter(r => r.status === "Entregue" && r.entregueEm && r.criadoEm);
   const avgDays = ent.length ? ent.reduce((s,r) => s + (r.entregueEm - r.criadoEm)/864e5, 0) / ent.length : 0;
-  const pessoas = new Set(rows.map(r => r.colaboradorEmail)).size;
+  const pessoas = new Set(rows.map(pessoaKey)).size;
   const I = (p) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
   const k = [
     {l:"Total de pedidos", v:fmtN(rows.length), d:`<b class="${diff>=0?"up":"down"}">${diff>=0?"▲":"▼"} ${Math.abs(diff)}</b> este mês vs. anterior`, c:"#3987e5", i:I('<path d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7"/>')},
@@ -571,14 +572,14 @@ function renderPainel(){
 
   /* ranking */
   const byC = {};
-  rows.filter(r => r.status !== "Recusado").forEach(r => { const k = r.colaboradorEmail; byC[k] ??= {r, p:0, n:0}; byC[k].p += r.pontosNum; byC[k].n++; });
+  rows.filter(r => r.status !== "Recusado").forEach(r => { const k = pessoaKey(r); byC[k] ??= {r, p:0, n:0}; byC[k].p += r.pontosNum; byC[k].n++; });
   const medal = ["🥇","🥈","🥉"];
   $("ranking").innerHTML = Object.values(byC).sort((a,b) => b.p-a.p).slice(0,6).map((x,i) =>
     `<div class="rk"><span class="pos">${medal[i]||i+1}</span>${av(x.r)}<div class="nm"><b>${esc(x.r.colaboradorNome||x.r.colaboradorEmail)}</b><span>${esc(x.r.filial||"")} · ${x.n} resgate${x.n>1?"s":""}</span></div><span class="pt">${fmtN(x.p)}</span></div>`).join("") || `<div class="mut">Sem dados ainda.</div>`;
 
   /* recentes */
   $("recent").innerHTML = rows.slice().sort((a,b) => (b.criadoEm||0)-(a.criadoEm||0)).slice(0,6).map(r =>
-    `<div class="rc" data-id="${esc(r.id)}">${av(r)}<div class="tx"><b>${esc(r.colaboradorNome||r.colaboradorEmail)}</b> <span class="mut">pediu</span> <b>${giftIc(r.premio)} ${esc(r.premio)}</b><div>${esc(r.filial||"")} · ${ago(r.criadoEm)} · ${fmtN(r.pontosNum)} points</div></div>${chip(r.status)}</div>`).join("") || `<div class="mut">Nenhuma solicitação ainda.</div>`;
+    `<div class="rc" data-id="${esc(r.id)}">${av(r)}<div class="tx"><b>${esc(r.colaboradorNome||r.colaboradorEmail)}</b> <span class="mut">pediu</span> <b>${giftIc(r.premio)} ${esc(r.premio)}</b><div>${[esc(r.filial||""), ago(r.criadoEm), fmtN(r.pontosNum)+" points"].filter(Boolean).join(" · ")}</div></div>${chip(r.status)}</div>`).join("") || `<div class="mut">Nenhuma solicitação ainda.</div>`;
 }
 
 /* ---------- LISTA ---------- */
@@ -609,7 +610,7 @@ function renderLista(){
         <div class="prize"><div class="gift">${giftIc(r.premio)}</div><div class="pn"><b>${esc(r.premio)}</b><span>prêmio escolhido</span></div><div class="ptbadge">${fmtN(r.pontosNum)}<small>pts</small></div></div>
         ${saldoBar(r)}
         ${stepper(r.status)}
-        <div class="meta"><span>📅 ${fmtDT(r.criadoEm)}</span><span>${ago(r.criadoEm)}${r.observacao?" · 💬":""}</span></div>
+        <div class="meta"><span>📅 ${r.criadoEm ? fmtDT(r.criadoEm) : "Sem data (histórico)"}</span><span>${ago(r.criadoEm)}${r.observacao?" · 💬":""}</span></div>
       </div>`).join("")}</div>`;
   } else {
     $("listOut").innerHTML = `<div class="tablebox"><table><thead><tr><th>Data</th><th>Colaborador</th><th>Filial</th><th>Prêmio</th><th>Points</th><th>Saldo</th><th>Status</th></tr></thead><tbody>${list.map(r => `
