@@ -267,9 +267,10 @@ textarea.inp{min-height:90px;resize:vertical}
 .tl .ev div{font-size:12.5px;color:var(--mut)}
 .df{padding:14px 24px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end;background:var(--card)}
 
-.toast{position:fixed;right:18px;bottom:18px;display:flex;gap:12px;align-items:center;background:linear-gradient(135deg,var(--card3),var(--card2));border:1px solid var(--acc);border-radius:16px;padding:14px 18px;box-shadow:0 14px 40px rgba(0,0,0,.5),0 0 30px rgba(242,140,40,.2);z-index:95;max-width:360px;animation:up .35s cubic-bezier(.2,.8,.2,1)}
+#toasts{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:95;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;width:max-content;max-width:calc(100vw - 32px)}
+.toast{position:relative;pointer-events:auto;display:flex;gap:12px;align-items:center;background:linear-gradient(135deg,var(--card3),var(--card2));border:1px solid var(--acc);border-radius:16px;padding:14px 18px;box-shadow:0 14px 40px rgba(0,0,0,.5),0 0 30px rgba(242,140,40,.2);z-index:95;max-width:360px;animation:up .35s cubic-bezier(.2,.8,.2,1)}
 .toast .gift{width:42px;height:42px;font-size:22px}
-@keyframes up{from{transform:translateY(30px);opacity:0}}
+@keyframes up{from{transform:translateY(-20px);opacity:0}}
 
 @media (max-width:1200px){.kpis{grid-template-columns:repeat(3,1fr)}.c4,.c5,.c7,.c8{grid-column:span 6}}
 @media (max-width:820px){.c4,.c5,.c6,.c7,.c8{grid-column:span 12}.board{grid-template-columns:repeat(4,85vw)}}
@@ -452,7 +453,7 @@ const GIFTS = [[/miniatura|volvo|caminh|fh ?540|truck/i,"🚛"],[/kit caf|caf[e�
 const giftIc = p => (GIFTS.find(([re]) => re.test(p)) || [,"🎁"])[1];
 
 let rows = [], seen = new Set(), firstLoad = true, tab = "painel", view = "cards", stFilter = "", current = null, newIds = [];
-let api = null, pendentes = 0;
+let api = null, pendentes = 0, geracao = 0;
 
 /* ---------- normaliza documento ---------- */
 function norm(id, d){
@@ -655,11 +656,11 @@ async function setStatus(r, status, observacao = r.observacao ?? ""){
   // atualiza a tela NA HORA e salva na planilha em segundo plano
   const antes = { status: r.status, observacao: r.observacao, historico: r.historico, entregueEm: r.entregueEm };
   Object.assign(r, data, data.entregueEm ? { entregueEm: new Date(data.entregueEm) } : {});
-  renderAll();
+  geracao++; renderAll();
   pendentes++;
   try { await api.save(r.id, data); }
-  catch (err) { Object.assign(r, antes); renderAll(); throw err; }
-  finally { pendentes--; }
+  catch (err) { Object.assign(r, antes); geracao++; renderAll(); throw err; }
+  finally { pendentes--; geracao++; }
 }
 
 /* ---------- DRAWER ---------- */
@@ -737,7 +738,7 @@ $("btnNotif").onclick = async () => {
 function toast(ic, html, ms = 6000, reuse = null){
   const t = reuse || document.createElement("div"); t.className = "toast";
   t.innerHTML = `<div class="gift">${ic}</div><div>${html}</div>`;
-  if (!reuse) document.body.appendChild(t);
+  if (!reuse) { let box = $("toasts"); if (!box) { box = document.createElement("div"); box.id = "toasts"; document.body.appendChild(box); } box.appendChild(t); }
   clearTimeout(t._tm); if (ms) t._tm = setTimeout(() => t.remove(), ms);
   return t;
 }
@@ -763,8 +764,9 @@ function startApi(){
     return j;
   };
   const carregar = async () => {
+    const g = geracao;
     const j = await call({ acao:"listar" });
-    if (pendentes) return;              // não sobrescreve uma alteração que ainda está salvando
+    if (pendentes || g !== geracao) return;   // resposta antiga: houve alteração enquanto carregava
     onData(j.itens.map(d => norm(d.id, d)));
   };
   api = {
